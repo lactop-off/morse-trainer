@@ -6,7 +6,7 @@
 <script src="./support.js"></script>
 </head>
 <body>
-<x-dc>
+<x-dc hidden>
 <helmet>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Share+Tech+Mono&family=BIZ+UDPGothic:wght@400;700&display=swap" />
@@ -34,6 +34,9 @@
       0 12px 30px rgba(0,0,0,.75), 0 0 0 1px #14120e;
   }
 
+  .sr { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
   .eng  { color:var(--etch); text-shadow:0 1px 0 rgba(255,255,255,.24); letter-spacing:.20em; }
   .mono { font-family:'Share Tech Mono','Barlow Condensed',monospace; }
   .cap  { font-family:'Barlow Condensed',sans-serif; font-weight:600; }
@@ -50,7 +53,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 3px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.5);
     border:1px solid #4a3814;
   }
-  .plate .t { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:19px; line-height:1;
+  .plate h1.t { margin:0; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:19px; line-height:1;
     color:#37280c; text-shadow:0 1px 0 rgba(255,255,255,.35); letter-spacing:.30em; }
   .plate .s { font-size:10.5px; margin-top:4px; color:#3f2f10; letter-spacing:.16em; opacity:.85; }
 
@@ -134,7 +137,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.30);
     border:1px solid rgba(0,0,0,.28); }
   .modhd { display:flex; align-items:center; gap:9px; }
-  .modhd .n { font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:10px; }
+  .modhd h2.n { margin:0; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:10px; }
   .modhd .j { font-size:10.5px; }
   .spacer { margin-left:auto; }
 
@@ -254,11 +257,12 @@
 </helmet>
 
 <div class="mch" style="--lamp:{{ lamp }};--ui-font:{{ uiFont }}">
+<p class="sr">{{ L.desc }}</p>
 <div class="panel">
 
   <header class="hdr">
     <div class="plate">
-      <div class="t">MORSE PRACTICE SET</div>
+      <h1 class="t">MORSE PRACTICE SET</h1>
       <div class="s">{{ L.sub }}</div>
     </div>
 
@@ -333,7 +337,7 @@
     <section class="bay">
       <div class="mod chartmod">
         <div class="modhd">
-          <span class="n eng">{{ L.treeT }}</span>
+          <h2 class="n eng">{{ L.treeT }}</h2>
           <span class="j eng">{{ L.treeS }}</span>
           <span class="spacer"></span>
           <span class="glabel">{{ chartLabel }}</span>
@@ -393,7 +397,7 @@
       <sc-if value="{{ isDrill }}" hint-placeholder-val="{{ true }}">
         <div class="mod">
           <div class="modhd">
-            <span class="n eng">{{ L.drillT }}</span>
+            <h2 class="n eng">{{ L.drillT }}</h2>
             <span class="j eng">{{ L.drillS }}</span>
             <span class="spacer"></span>
             <span class="glabel">{{ drillStat }}</span>
@@ -412,7 +416,7 @@
 
       <div class="mod">
         <div class="modhd">
-          <span class="n eng">{{ L.rxT }}</span>
+          <h2 class="n eng">{{ L.rxT }}</h2>
           <span class="j eng">{{ L.rxS }}</span>
           <span class="spacer"></span>
           <span class="{{ markLedCls }}"></span>
@@ -427,7 +431,7 @@
 
       <div class="mod">
         <div class="modhd">
-          <span class="n eng">{{ L.keyT }}</span>
+          <h2 class="n eng">{{ L.keyT }}</h2>
           <span class="j eng">{{ L.keyS }}</span>
           <span class="spacer"></span>
           <span class="{{ keyLedCls }}"></span>
@@ -473,7 +477,7 @@
 
       <div class="mod tapemod">
         <div class="modhd">
-          <span class="n eng">{{ L.tapeT }}</span>
+          <h2 class="n eng">{{ L.tapeT }}</h2>
           <span class="j eng">{{ L.tapeS }}</span>
           <span class="spacer"></span>
           <span class="glabel eng mono">{{ tapeCount }}</span>
@@ -565,9 +569,9 @@ function pickLang(loc, nav, stored) {
     const q = new URLSearchParams(loc.search || "").get("lang");
     if (q && HAS_LANG[q]) return q;
   } catch (e) {}
-  if (stored && HAS_LANG[stored]) return stored;
   const seg = String(loc.pathname || "").split("/").filter(Boolean)[0];
-  if (seg && HAS_LANG[seg]) return seg;                                 /* /ja/ */
+  if (seg && HAS_LANG[seg]) return seg;                                 /* /ja/ は明示指定として扱う */
+  if (stored && HAS_LANG[stored]) return stored;
   const byHost = langFromHost(loc.hostname);
   if (byHost) return byHost;
   const list = (nav && (nav.languages || (nav.language ? [nav.language] : []))) || [];
@@ -582,9 +586,12 @@ function fmt(s, v) {
   return String(s).replace(/\{(\w+)\}/g, (m, k) => (v && v[k] !== undefined ? v[k] : m));
 }
 
+/* @str-start */
 const STR = {
   en: {
     title: "Morse Practice Set — learn Morse on a code tree",
+    desc: "Learn Morse code by tracing a signal tree. Tap a straight key or two buttons, watch the branch light up, and practise with built-in drills. Latin and Japanese Wabun, free in your browser.",
+    langName: "English", nojs: "This page needs JavaScript. Turn it on to use the practice set.",
     sub: "Signal-Tree Practice Set · Model 1926 · No. 004-A",
     gCode: "CODE", gMode: "MODE", gKey: "KEY", gAudio: "AUDIO", gLang: "LANG",
     cLatin: "Latin", cWabun: "Wabun", mFree: "Free", mDrill: "Drill", kKey: "Key", kPad: "2 keys",
@@ -614,6 +621,8 @@ const STR = {
   },
   ja: {
     title: "符号樹モールス練習器",
+    desc: "符号樹をたどってモールス符号を覚える練習器。電鍵または2つの釦で打つと、たどった枝が光ります。出題モードつき。欧文と和文に対応、ブラウザだけで動きます。",
+    langName: "日本語", nojs: "この練習器は JavaScript を使います。有効にしてお使いください。",
     sub: "符 号 樹 練 習 器 ・ 型 1926 ・ No. 004-A",
     gCode: "符号系", gMode: "練習", gKey: "打鍵", gAudio: "側音", gLang: "言語",
     cLatin: "欧文", cWabun: "和文", mFree: "自由", mDrill: "出題", kKey: "長さ", kPad: "2釦",
@@ -643,6 +652,8 @@ const STR = {
   },
   es: {
     title: "Equipo de práctica Morse — aprende con el árbol de códigos",
+    desc: "Aprende código Morse recorriendo un árbol de señales. Pulsa el manipulador o dos botones y mira cómo se ilumina la rama. Con ejercicios, alfabeto latino y Wabun japonés, gratis en el navegador.",
+    langName: "Español", nojs: "Esta página necesita JavaScript. Actívalo para usar el equipo de práctica.",
     sub: "Equipo de práctica del árbol de señales · Modelo 1926 · N.º 004-A",
     gCode: "CÓDIGO", gMode: "MODO", gKey: "MANIPULADOR", gAudio: "AUDIO", gLang: "IDIOMA",
     cLatin: "Latino", cWabun: "Wabun", mFree: "Libre", mDrill: "Ejercicio", kKey: "Pulsación", kPad: "2 botones",
@@ -672,6 +683,8 @@ const STR = {
   },
   fr: {
     title: "Poste d’entraînement Morse — apprendre avec l’arbre des codes",
+    desc: "Apprenez le code Morse en parcourant un arbre des signaux. Manipulez la touche ou deux boutons et voyez la branche s’allumer. Exercices intégrés, latin et wabun japonais, gratuit dans le navigateur.",
+    langName: "Français", nojs: "Cette page a besoin de JavaScript. Activez-le pour utiliser le poste d’entraînement.",
     sub: "Poste d’entraînement à l’arbre des signaux · Modèle 1926 · N° 004-A",
     gCode: "CODE", gMode: "MODE", gKey: "MANIPULATEUR", gAudio: "AUDIO", gLang: "LANGUE",
     cLatin: "Latin", cWabun: "Wabun", mFree: "Libre", mDrill: "Exercice", kKey: "Durée", kPad: "2 touches",
@@ -701,6 +714,8 @@ const STR = {
   },
   de: {
     title: "Morse-Übungsgerät — Morsen am Codebaum lernen",
+    desc: "Morsecode lernen, indem man einem Signalbaum folgt. Mit Handtaste oder zwei Tasten geben und den Ast aufleuchten sehen. Mit Übungen, lateinisch und japanisch (Wabun), kostenlos im Browser.",
+    langName: "Deutsch", nojs: "Diese Seite braucht JavaScript. Bitte aktivieren, um das Übungsgerät zu nutzen.",
     sub: "Signalbaum-Übungsgerät · Modell 1926 · Nr. 004-A",
     gCode: "CODE", gMode: "MODUS", gKey: "TASTE", gAudio: "TON", gLang: "SPRACHE",
     cLatin: "Latein", cWabun: "Wabun", mFree: "Frei", mDrill: "Übung", kKey: "Dauer", kPad: "2 Tasten",
@@ -730,6 +745,8 @@ const STR = {
   },
   pt: {
     title: "Aparelho de prática de Morse — aprenda pela árvore de códigos",
+    desc: "Aprenda código Morse percorrendo uma árvore de sinais. Manipule a tecla ou dois botões e veja o ramo acender. Com exercícios, alfabeto latino e Wabun japonês, grátis no navegador.",
+    langName: "Português", nojs: "Esta página precisa de JavaScript. Ative-o para usar o aparelho de prática.",
     sub: "Aparelho de prática da árvore de sinais · Modelo 1926 · N.º 004-A",
     gCode: "CÓDIGO", gMode: "MODO", gKey: "MANIPULADOR", gAudio: "ÁUDIO", gLang: "IDIOMA",
     cLatin: "Latino", cWabun: "Wabun", mFree: "Livre", mDrill: "Exercício", kKey: "Duração", kPad: "2 botões",
@@ -759,6 +776,8 @@ const STR = {
   },
   ru: {
     title: "Морзянка — тренажёр с деревом кодов",
+    desc: "Учите азбуку Морзе, двигаясь по дереву сигналов. Работайте ключом или двумя кнопками и смотрите, как загорается ветвь. Есть задания, латиница и японский вабун, бесплатно в браузере.",
+    langName: "Русский", nojs: "Для этой страницы нужен JavaScript. Включите его, чтобы пользоваться тренажёром.",
     sub: "Тренажёр «дерево сигналов» · модель 1926 · № 004-A",
     gCode: "КОД", gMode: "РЕЖИМ", gKey: "КЛЮЧ", gAudio: "ЗВУК", gLang: "ЯЗЫК",
     cLatin: "Латиница", cWabun: "Вабун", mFree: "Свободно", mDrill: "Задание", kKey: "Длительность", kPad: "2 кнопки",
@@ -788,6 +807,8 @@ const STR = {
   },
   zh: {
     title: "莫尔斯电码练习器 — 用码树学习",
+    desc: "沿着码树学习莫尔斯电码。用电键或两个按钮发报，走过的分支会亮起。内置出题练习，支持拉丁字母与日文和文，浏览器即可使用。",
+    langName: "中文", nojs: "本页需要 JavaScript。请启用后使用练习器。",
     sub: "码树练习器 · 1926 型 · No. 004-A",
     gCode: "码制", gMode: "模式", gKey: "电键", gAudio: "侧音", gLang: "语言",
     cLatin: "拉丁", cWabun: "和文", mFree: "自由", mDrill: "出题", kKey: "按键时长", kPad: "双键",
@@ -817,6 +838,8 @@ const STR = {
   },
   ko: {
     title: "모스 부호 연습기 — 부호 나무로 배우기",
+    desc: "부호 나무를 따라가며 모스 부호를 배우는 연습기. 전건이나 두 버튼으로 타건하면 지나온 가지가 켜집니다. 출제 연습 포함, 라틴 문자와 일본어 와분 지원, 브라우저만으로 무료.",
+    langName: "한국어", nojs: "이 페이지는 JavaScript가 필요합니다. 사용하려면 활성화해 주세요.",
     sub: "부호 나무 연습기 · 1926년형 · No. 004-A",
     gCode: "부호계", gMode: "모드", gKey: "전건", gAudio: "측음", gLang: "언어",
     cLatin: "라틴", cWabun: "일문", mFree: "자유", mDrill: "출제", kKey: "누름 길이", kPad: "두 버튼",
@@ -845,6 +868,7 @@ const STR = {
     dotG: "·", dashG: "–"
   }
 };
+/* @str-end */
 
 /* ─ 符号樹の寸法（viewBox の中の座標）─
    P = 葉と葉の横間隔、G = 段の縦間隔。囲みは 丸＝短点 / 角＝長点。 */
