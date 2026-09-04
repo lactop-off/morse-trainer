@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Share+Tech+Mono&family=BIZ+UDPGothic:wght@400;700&display=swap" />
+<style>
+  body { margin:0; background:#0c0b09; }
+
+  .mch {
+    --m1:#847d73; --m2:#615b53; --m3:#443f39; --m4:#2e2b26;
+    --dim:#8f887a; --etch:#221f1a;
+    height:100vh; overflow:hidden; box-sizing:border-box; padding:11px; display:flex;
+    background:radial-gradient(130% 100% at 50% -18%, #2a2620, #0a0908 72%);
+    font-family:var(--ui-font);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .panel {
+    flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; position:relative;
+    border-radius:7px; overflow:hidden;
+    background:
+      repeating-linear-gradient(91deg, rgba(255,255,255,.040) 0 1px, rgba(0,0,0,.035) 1px 3px),
+      linear-gradient(167deg, var(--m1), var(--m2) 36%, var(--m3) 74%, var(--m4));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.30), inset 0 -3px 6px rgba(0,0,0,.55),
+      inset 3px 0 6px rgba(0,0,0,.30), inset -3px 0 6px rgba(0,0,0,.30),
+      0 12px 30px rgba(0,0,0,.75), 0 0 0 1px #14120e;
+  }
+
+  .eng  { color:var(--etch); text-shadow:0 1px 0 rgba(255,255,255,.24); letter-spacing:.20em; }
+  .mono { font-family:'Share Tech Mono','Barlow Condensed',monospace; }
+  .cap  { font-family:'Barlow Condensed',sans-serif; font-weight:600; }
+
+  .hdr {
+    display:flex; align-items:center; gap:18px; padding:9px 16px; flex-wrap:wrap;
+    border-bottom:1px solid #1c1a16;
+    box-shadow:0 1px 0 rgba(255,255,255,.16);
+    background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.14));
+  }
+  .plate {
+    padding:7px 15px 8px; border-radius:3px;
+    background:linear-gradient(163deg,#c8a862,#8d6f31 45%,#6b5223 70%,#a98a45);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 3px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.5);
+    border:1px solid #4a3814;
+  }
+  .plate .t { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:19px; line-height:1;
+    color:#37280c; text-shadow:0 1px 0 rgba(255,255,255,.35); letter-spacing:.30em; }
+  .plate .s { font-size:10.5px; margin-top:4px; color:#3f2f10; letter-spacing:.16em; opacity:.85; }
+
+  .grp { display:flex; flex-direction:column; gap:5px; }
+  .glabel { font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:9.5px;
+    color:#9d9486; text-shadow:0 1px 1px rgba(0,0,0,.55); }
+  .row { display:flex; gap:7px; align-items:center; }
+
+  .btn {
+    border:1px solid #17150f; border-radius:3px; cursor:pointer; padding:0 12px; height:30px;
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    background:linear-gradient(180deg,#544f47,#332f2a);
+    color:#b6afa1; text-shadow:0 1px 1px rgba(0,0,0,.75);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 2px 0 #1b1915, 0 3px 6px rgba(0,0,0,.45);
+    font-family:'BIZ UDPGothic',sans-serif; font-size:12.5px; letter-spacing:.12em;
+    transition:background .1s, color .1s, box-shadow .1s;
+  }
+  .btn:hover { background:linear-gradient(180deg,#5e584f,#3a352f); }
+  .btn:active { transform:translateY(2px); box-shadow: inset 0 2px 6px rgba(0,0,0,.65); }
+  .btn.on {
+    background:linear-gradient(180deg, color-mix(in srgb, var(--lamp) 62%, #4a3517), color-mix(in srgb, var(--lamp) 32%, #251a09));
+    color:#fff2df;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.40), 0 0 16px color-mix(in srgb, var(--lamp) 55%, transparent), 0 2px 0 #1b1915;
+  }
+  .btn.ico { width:38px; padding:0; }
+
+  .langbox { position:relative; }
+  .btn.lang { font-family:'Share Tech Mono',monospace; letter-spacing:.10em; min-width:44px; }
+  .langmenu {
+    position:absolute; top:100%; right:0; margin-top:5px; z-index:40; display:flex; flex-direction:column;
+    min-width:132px; padding:4px; gap:2px; border-radius:4px; border:1px solid #14120f;
+    background:linear-gradient(180deg,#4b463f,#2c2925);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px rgba(0,0,0,.6);
+  }
+  .langmenu button {
+    height:27px; padding:0 10px; text-align:left; border:0; border-radius:2px; cursor:pointer;
+    background:transparent; color:#c0b8a9; font-size:12.5px; letter-spacing:.06em;
+    font-family:'BIZ UDPGothic',system-ui,sans-serif;
+  }
+  .langmenu button:hover { background:rgba(255,255,255,.09); color:#f0e9db; }
+  .langmenu button.on { background:color-mix(in srgb, var(--lamp) 45%, #3a2a12); color:#fff3e0; }
+
+  .screws { display:flex; gap:9px; margin-left:auto; align-self:flex-start; padding-top:3px; }
+  .scr {
+    width:13px; height:13px; border-radius:50%; position:relative;
+    background:radial-gradient(circle at 33% 27%, #c2bbad, #6e685e 56%, #322f29);
+    box-shadow: inset 0 -1px 1px rgba(0,0,0,.6), 0 1px 1px rgba(255,255,255,.16);
+  }
+  .scr::after { content:''; position:absolute; left:2px; right:2px; top:calc(50% - 1px); height:2px;
+    background:linear-gradient(180deg,#26231e,#615b51); border-radius:1px; }
+  .scr.r1::after { transform:rotate(38deg) }
+  .scr.r2::after { transform:rotate(-62deg) }
+  .scr.r3::after { transform:rotate(9deg) }
+
+  .body { display:flex; flex:1; min-height:0; flex-wrap:nowrap; align-items:stretch; }
+
+  .bay { flex:1 1 430px; min-width:0; min-height:0; display:flex; padding:10px 6px 10px 12px; box-sizing:border-box; }
+  .chartmod { flex:1; min-width:0; min-height:0; }
+  .chart {
+    position:relative; flex:1; min-height:0; border-radius:3px; overflow:hidden;
+    border:1px solid #0f0d0b;
+    background:radial-gradient(130% 110% at 50% -12%, #1d242c, #090d11 72%);
+    box-shadow: inset 0 3px 13px rgba(0,0,0,.88), inset 0 0 0 1px #000, 0 1px 0 rgba(255,255,255,.17);
+  }
+  .tree { position:absolute; inset:9px; width:calc(100% - 18px); height:calc(100% - 18px); }
+
+  .side {
+    flex:1 1 372px; max-width:436px; display:flex; flex-direction:column; gap:9px;
+    padding:10px 12px 10px 0; box-sizing:border-box; overflow-y:auto;
+  }
+  @media (max-width:1280px) { .side { flex-basis:322px; max-width:356px } .bay { padding-left:9px } }
+  @media (max-width:900px) {
+    .mch { height:auto; min-height:100vh; overflow:visible }
+    .body { flex-wrap:wrap }
+    .side { padding-left:13px; max-width:none }
+    .bay { min-height:min(88vw, 620px) }
+  }
+
+  .mod { display:flex; flex-direction:column; gap:7px; padding:9px 12px 11px; border-radius:5px;
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.10));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.30);
+    border:1px solid rgba(0,0,0,.28); }
+  .modhd { display:flex; align-items:center; gap:9px; }
+  .modhd .n { font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:10px; }
+  .modhd .j { font-size:10.5px; }
+  .spacer { margin-left:auto; }
+
+  .win { position:relative; border-radius:3px; overflow:hidden; border:1px solid #100e0c;
+    background:linear-gradient(180deg,#0a0c0b,#040605);
+    box-shadow: inset 0 3px 11px rgba(0,0,0,.92), inset 0 0 0 1px #000, 0 1px 0 rgba(255,255,255,.17); }
+  .win::after { content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(180deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px),
+               linear-gradient(198deg, rgba(255,255,255,.10), transparent 46%); }
+
+  .readout { display:flex; align-items:center; gap:14px; padding:9px 15px; min-height:46px; }
+  .sig { font-family:'Share Tech Mono',monospace; font-size:29px; letter-spacing:.10em; line-height:1;
+    color:var(--lamp); text-shadow:0 0 12px color-mix(in srgb, var(--lamp) 60%, transparent); }
+  .sig.idle { color:#2f3a34; text-shadow:none; }
+  .glyph { margin-left:auto; font-size:44px; line-height:1; font-weight:700;
+    color:var(--lamp); text-shadow:0 0 16px color-mix(in srgb, var(--lamp) 55%, transparent); }
+  .glyph.idle { color:#2b3630; text-shadow:none; }
+
+  .status { font-size:11.5px; letter-spacing:.10em; }
+  .status.err { color:#e0603a; text-shadow:0 1px 0 rgba(0,0,0,.4); }
+  .status.ok { color:#231f1a; text-shadow:0 1px 0 rgba(255,255,255,.22); }
+
+  .led { width:9px; height:9px; border-radius:50%; background:#241a10; flex:0 0 auto;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.12); }
+  .led.on { background:var(--lamp); box-shadow:0 0 11px var(--lamp), inset 0 0 3px rgba(255,255,255,.7); }
+  .led.red.on { background:#ef4a2c; box-shadow:0 0 11px #ef4a2c, inset 0 0 3px rgba(255,255,255,.7); }
+
+  .keyarea { display:flex; flex-direction:column; align-items:center; gap:10px; padding:5px 0 1px; }
+
+  .keybtn {
+    width:116px; height:116px; border-radius:50%; border:0; padding:0; cursor:pointer;
+    position:relative; touch-action:none; user-select:none;
+    display:flex; align-items:center; justify-content:center;
+    background:conic-gradient(from 212deg, #938c7f, #4b463f 24%, #9a9385 50%, #474239 76%, #938c7f);
+    box-shadow: 0 4px 0 #1a1814, 0 8px 14px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.30);
+    transition: transform .05s ease-out, box-shadow .05s ease-out;
+  }
+  .keybtn::before {
+    content:''; position:absolute; inset:12px; border-radius:50%;
+    background:radial-gradient(circle at 37% 29%, #514a43, #221f1b 62%, #100e0c);
+    box-shadow: inset 0 2px 3px rgba(255,255,255,.14), inset 0 -4px 8px rgba(0,0,0,.72),
+                0 1px 0 rgba(255,255,255,.10);
+    transition: background .06s;
+  }
+  .keybtn.down { transform:translateY(4px);
+    box-shadow: 0 0 0 #1a1814, 0 2px 6px rgba(0,0,0,.6), inset 0 2px 8px rgba(0,0,0,.55),
+                0 0 22px rgba(50,125,96,.45); }
+  .keybtn.down::before { background:radial-gradient(circle at 40% 32%, #2e7157, #0d1613 68%); }
+  .keybtn.down.long { box-shadow: 0 0 0 #1a1814, 0 2px 6px rgba(0,0,0,.6), inset 0 2px 8px rgba(0,0,0,.55),
+                0 0 26px color-mix(in srgb, var(--lamp) 52%, transparent); }
+  .keybtn.down.long::before { background:radial-gradient(circle at 40% 32%,
+    color-mix(in srgb, var(--lamp) 50%, #2b1e0c), #16110c 68%); }
+
+  .kmeter { width:100%; }
+
+  /* 2つの釦で打つ方式 */
+  .pads { display:grid; grid-template-columns:1fr 1fr; gap:11px; width:100%; }
+  .pad { height:82px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:11px;
+    border:1px solid #17150f; border-radius:5px; cursor:pointer; touch-action:none;
+    background:linear-gradient(180deg,#555048,#332f2a);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 3px 0 #1b1915, 0 4px 8px rgba(0,0,0,.45);
+    transition:transform .05s, box-shadow .05s, background .1s; }
+  .pad:hover { background:linear-gradient(180deg,#615b52,#3a352f); }
+  .pad:active { transform:translateY(3px); box-shadow: inset 0 2px 7px rgba(0,0,0,.6); }
+  /* 符号樹の 丸＝短点 / 角＝長点 と同じ形にそろえる */
+  .psym { background:#e6ddcb; box-shadow:0 -1px 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.5); }
+  .psym.dot  { width:15px; height:15px; border-radius:50%; }
+  .psym.dash { width:38px; height:15px; border-radius:3px; }
+  .plab { font-size:11px; letter-spacing:.16em; color:#a49b8c; }
+
+  /* 出題 */
+  .drill { display:flex; align-items:center; gap:12px; padding:9px 15px; min-height:56px; }
+  .dcap { font-size:11px; letter-spacing:.12em; color:#5f7a6c; flex:0 0 auto; }
+  .target { flex:1; text-align:center; font-size:40px; line-height:1; font-weight:700;
+    color:var(--lamp); text-shadow:0 0 16px color-mix(in srgb, var(--lamp) 55%, transparent); }
+  .judge { flex:0 0 auto; min-width:120px; text-align:right; font-size:12px; letter-spacing:.08em; color:#3f4a44; }
+  .judge.ok { color:#5fd6a4; text-shadow:0 0 10px rgba(95,214,164,.55); }
+  .judge.ng { color:#f0724d; text-shadow:0 0 10px rgba(240,114,77,.45); }
+  .skip { height:30px; font-size:12px; }
+  .undo { height:34px; font-size:12.5px; }
+
+  .gauge { position:relative; height:15px; border-radius:2px; overflow:hidden; border:1px solid #17150f;
+    background:linear-gradient(180deg,#17171a,#0e0e10);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.14); }
+  .gfill { position:absolute; left:0; top:0; bottom:0; transition:width .03s linear; }
+  .gtick { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.20); }
+  .gthr  { position:absolute; top:0; bottom:0; width:2px; background:#ef4a2c; box-shadow:0 0 6px rgba(239,74,44,.8); }
+  .glab { display:flex; font-size:10px; letter-spacing:.08em; }
+
+  .tapemod { flex:1; display:flex; flex-direction:column; min-height:126px; gap:7px; }
+  .slot { position:relative; flex:1; min-height:92px; border-radius:3px; overflow:hidden;
+    border:1px solid #16140f; box-shadow: inset 0 4px 10px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.14); }
+  .slot::before, .slot::after { content:''; position:absolute; top:0; bottom:0; width:19px; z-index:2; pointer-events:none;
+    background-image:radial-gradient(circle at 9.5px 17px, #17130e 3.1px, rgba(0,0,0,.22) 3.8px, transparent 4.6px);
+    background-size:19px 34px; }
+  .slot::before { left:0; box-shadow:inset 6px 0 9px rgba(0,0,0,.30) }
+  .slot::after  { right:0; box-shadow:inset -6px 0 9px rgba(0,0,0,.30) }
+  .tape { position:absolute; inset:0; overflow-y:auto; padding:8px 27px; box-sizing:border-box;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 33px, rgba(138,112,70,.22) 33px 34px),
+      linear-gradient(178deg,#e9e0ca,#d9cdb0);
+    font-family:'Share Tech Mono',monospace; font-size:21px; line-height:34px; letter-spacing:.20em;
+    color:#2b2418; word-break:break-all; text-wrap:pretty; }
+  .tape.empty { color:#a2957a; }
+
+  .clr { height:34px; padding:0 14px; border-radius:3px; cursor:pointer; border:1px solid #2b1008;
+    background:linear-gradient(180deg,#a8341c,#6d1d0d); color:#ffd9c8; font-size:12.5px; letter-spacing:.16em;
+    font-family:'BIZ UDPGothic',sans-serif; text-shadow:0 1px 1px rgba(0,0,0,.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.32), 0 2px 0 #3b1008, 0 3px 6px rgba(0,0,0,.5); }
+  .clr:active { transform:translateY(2px); box-shadow: inset 0 2px 6px rgba(0,0,0,.6); }
+
+  .foot { display:flex; align-items:center; gap:14px; padding:5px 16px 7px; flex-wrap:wrap;
+    border-top:1px solid rgba(0,0,0,.32); box-shadow:inset 0 1px 0 rgba(255,255,255,.13);
+    font-size:10px; }
+  .foot .eng { color:#a49b8c; text-shadow:0 1px 1px rgba(0,0,0,.65); }
+</style>
+</helmet>
+
+<div class="mch" style="--lamp:{{ lamp }};--ui-font:{{ uiFont }}">
+<div class="panel">
+
+  <header class="hdr">
+    <div class="plate">
+      <div class="t">MORSE PRACTICE SET</div>
+      <div class="s">{{ L.sub }}</div>
+    </div>
+
+    <div class="grp">
+      <div class="glabel eng">{{ L.gCode }}</div>
+      <div class="row">
+        <button type="button" class="{{ tabIntlCls }}" onClick="{{ setIntl }}">{{ L.cLatin }}</button>
+        <button type="button" class="{{ tabWabunCls }}" onClick="{{ setWabun }}">{{ L.cWabun }}</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="glabel eng">{{ L.gMode }}</div>
+      <div class="row">
+        <button type="button" class="{{ tabFreeCls }}" onClick="{{ setFree }}">{{ L.mFree }}</button>
+        <button type="button" class="{{ tabDrillCls }}" onClick="{{ setDrill }}">{{ L.mDrill }}</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="glabel eng">{{ L.gKey }}</div>
+      <div class="row">
+        <button type="button" class="{{ tabKeyCls }}" onClick="{{ setKeyMode }}">{{ L.kKey }}</button>
+        <button type="button" class="{{ tabPadCls }}" onClick="{{ setPadMode }}">{{ L.kPad }}</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="glabel eng">{{ L.gAudio }}</div>
+      <div class="row">
+        <button type="button" class="{{ soundCls }}" onClick="{{ toggleSound }}">
+          <sc-if value="{{ soundOn }}" hint-placeholder-val="{{ true }}">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 9.3h3.3L12 5.2v13.6L7.3 14.7H4z" fill="currentColor" />
+              <path d="M15.7 8.7a4.7 4.7 0 0 1 0 6.6" />
+              <path d="M18.6 5.9a8.7 8.7 0 0 1 0 12.2" />
+            </svg>
+          </sc-if>
+          <sc-if value="{{ soundOff }}" hint-placeholder-val="{{ false }}">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 9.3h3.3L12 5.2v13.6L7.3 14.7H4z" fill="currentColor" />
+              <path d="M16.2 9.4l5.2 5.2" />
+              <path d="M21.4 9.4l-5.2 5.2" />
+            </svg>
+          </sc-if>
+        </button>
+        <div class="{{ audioLedCls }}"></div>
+      </div>
+    </div>
+
+    <div class="grp langbox">
+      <div class="glabel eng">{{ L.gLang }}</div>
+      <div class="row">
+        <button type="button" class="btn lang" onClick="{{ toggleLangMenu }}">{{ langTag }}</button>
+      </div>
+      <sc-if value="{{ langOpen }}" hint-placeholder-val="{{ false }}">
+        <div class="langmenu">
+          <sc-for list="{{ langList }}" as="l" hint-placeholder-count="0">
+            <button type="button" class="{{ l.cls }}" onClick="{{ l.onClick }}">{{ l.name }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <div class="screws">
+      <div class="scr r1"></div><div class="scr r2"></div><div class="scr r3"></div>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <section class="bay">
+      <div class="mod chartmod">
+        <div class="modhd">
+          <span class="n eng">{{ L.treeT }}</span>
+          <span class="j eng">{{ L.treeS }}</span>
+          <span class="spacer"></span>
+          <span class="glabel">{{ chartLabel }}</span>
+        </div>
+
+        <div class="chart">
+          <svg class="tree" viewBox="{{ viewBox }}" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <radialGradient id="hub" cx="0.36" cy="0.28" r="0.82">
+                <stop offset="0" stop-color="#dccb98" />
+                <stop offset="0.45" stop-color="#987c3f" />
+                <stop offset="1" stop-color="#4a3a17" />
+              </radialGradient>
+            </defs>
+
+            <sc-for list="{{ levelRules }}" as="r" hint-placeholder-count="7">
+              <line x1="{{ r.x1 }}" y1="{{ r.y }}" x2="{{ r.x2 }}" y2="{{ r.y }}" stroke="#2b343d" stroke-width="1" stroke-dasharray="2 9" vector-effect="non-scaling-stroke" />
+            </sc-for>
+
+            <sc-for list="{{ treeEdges }}" as="e" hint-placeholder-count="30">
+              <path d="{{ e.d }}" fill="none" stroke="{{ e.stroke }}" stroke-width="{{ e.w }}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+            </sc-for>
+
+            <sc-for list="{{ treeNodes }}" as="n" hint-placeholder-count="45">
+              <g onClick="{{ n.onClick }}" style="cursor:pointer">
+                <rect x="{{ n.x }}" y="{{ n.y }}" width="{{ n.w }}" height="{{ n.h }}" rx="{{ n.rx }}" fill="{{ n.fill }}" stroke="{{ n.stroke }}" stroke-width="{{ n.sw }}" stroke-dasharray="{{ n.dash }}" vector-effect="non-scaling-stroke" />
+                <text x="{{ n.cx }}" y="{{ n.cy }}" text-anchor="middle" dominant-baseline="central" font-size="{{ n.fs }}" font-weight="700" fill="{{ n.tf }}" font-family="'BIZ UDPGothic','Share Tech Mono',sans-serif" style="pointer-events:none">{{ n.char }}</text>
+              </g>
+            </sc-for>
+
+            <g onClick="{{ toRoot }}" style="cursor:pointer">
+              <circle cx="{{ rootX }}" cy="{{ rootY }}" r="21" fill="url(#hub)" stroke="#2c230e" stroke-width="2" vector-effect="non-scaling-stroke" />
+              <circle cx="{{ rootX }}" cy="{{ rootY }}" r="12" fill="none" stroke="rgba(0,0,0,.34)" stroke-width="1" vector-effect="non-scaling-stroke" />
+              <circle cx="{{ rootX }}" cy="{{ rootY }}" r="4.5" fill="#3a2f14" />
+            </g>
+
+            <sc-for list="{{ edgeMarks }}" as="m" hint-placeholder-count="0">
+              <g style="pointer-events:none">
+                <circle cx="{{ m.cx }}" cy="{{ m.cy }}" r="13" fill="#0b0f13" stroke="{{ m.stroke }}" stroke-width="1.2" vector-effect="non-scaling-stroke" />
+                <text x="{{ m.cx }}" y="{{ m.cy }}" text-anchor="middle" dominant-baseline="central" font-size="16" fill="{{ m.fill }}" font-family="'Share Tech Mono',monospace">{{ m.sym }}</text>
+              </g>
+            </sc-for>
+
+            <sc-for list="{{ levelRules }}" as="r" hint-placeholder-count="7">
+              <g style="pointer-events:none">
+                <rect x="{{ r.lx }}" y="{{ r.ly }}" width="26" height="19" rx="2" fill="#121920" stroke="#303b45" stroke-width="1" vector-effect="non-scaling-stroke" />
+                <text x="{{ r.tx }}" y="{{ r.y }}" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#7e8b97" font-family="'Share Tech Mono',monospace">{{ r.t }}</text>
+              </g>
+            </sc-for>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+
+      <sc-if value="{{ isDrill }}" hint-placeholder-val="{{ true }}">
+        <div class="mod">
+          <div class="modhd">
+            <span class="n eng">{{ L.drillT }}</span>
+            <span class="j eng">{{ L.drillS }}</span>
+            <span class="spacer"></span>
+            <span class="glabel">{{ drillStat }}</span>
+          </div>
+          <div class="win drill">
+            <div class="dcap">{{ L.dPrompt }}</div>
+            <div class="target">{{ target }}</div>
+            <div class="{{ judgeCls }}">{{ judgeText }}</div>
+          </div>
+          <div class="row">
+            <button type="button" class="btn skip" onClick="{{ skip }}">{{ L.dSkip }}</button>
+            <span class="glabel" style="margin-left:auto">{{ poolLabel }}</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <div class="mod">
+        <div class="modhd">
+          <span class="n eng">{{ L.rxT }}</span>
+          <span class="j eng">{{ L.rxS }}</span>
+          <span class="spacer"></span>
+          <span class="{{ markLedCls }}"></span>
+          <span class="glabel eng">{{ L.mark }}</span>
+        </div>
+        <div class="win readout">
+          <div class="{{ sigCls }}">{{ sigGlyphs }}</div>
+          <div class="{{ glyphCls }}">{{ curChar }}</div>
+        </div>
+        <div class="{{ statusCls }}">{{ statusText }}</div>
+      </div>
+
+      <div class="mod">
+        <div class="modhd">
+          <span class="n eng">{{ L.keyT }}</span>
+          <span class="j eng">{{ L.keyS }}</span>
+          <span class="spacer"></span>
+          <span class="{{ keyLedCls }}"></span>
+          <span class="glabel">{{ L.keyDown }}</span>
+        </div>
+
+        <div class="keyarea">
+          <sc-if value="{{ isKeyMode }}" hint-placeholder-val="{{ true }}">
+            <button type="button" class="{{ keyBtnCls }}"
+              onPointerDown="{{ keyDown }}" onPointerUp="{{ keyUp }}" onPointerLeave="{{ keyUp }}"
+              onPointerCancel="{{ keyUp }}" onContextMenu="{{ noMenu }}">
+            </button>
+
+            <div class="kmeter">
+              <div class="gauge">
+                <div class="gfill" style="{{ gaugeFillStyle }}"></div>
+                <div class="gtick" style="left:25%"></div>
+                <div class="gthr" style="left:50%"></div>
+                <div class="gtick" style="left:75%"></div>
+              </div>
+              <div class="glab" style="margin-top:5px">
+                <span class="mono" style="color:#7c8f84">{{ gDotLab }}</span>
+                <span class="mono spacer" style="color:#c7bfb0">{{ gaugeLabel }}</span>
+                <span class="mono" style="color:#7c8f84;margin-left:auto">{{ gDashLab }}</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPadMode }}" hint-placeholder-val="{{ false }}">
+            <div class="pads">
+              <button type="button" class="pad" onClick="{{ pressDot }}">
+                <span class="psym dot"></span>
+                <span class="plab">{{ L.padDot }}</span>
+              </button>
+              <button type="button" class="pad" onClick="{{ pressDash }}">
+                <span class="psym dash"></span>
+                <span class="plab">{{ L.padDash }}</span>
+              </button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div class="mod tapemod">
+        <div class="modhd">
+          <span class="n eng">{{ L.tapeT }}</span>
+          <span class="j eng">{{ L.tapeS }}</span>
+          <span class="spacer"></span>
+          <span class="glabel eng mono">{{ tapeCount }}</span>
+        </div>
+        <div class="slot">
+          <div class="{{ tapeCls }}" ref="{{ tapeRef }}">{{ tapeText }}</div>
+        </div>
+        <div class="row">
+          <button type="button" class="clr" onClick="{{ reset }}">{{ L.tapeClear }}</button>
+          <button type="button" class="btn undo" onClick="{{ back }}">{{ L.tapeUndo }}</button>
+          <span class="glabel" style="margin-left:auto">{{ autoNote }}</span>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <div class="foot">
+    <span class="eng cap">{{ L.opT }}</span>
+    <span class="eng">{{ opHint }}</span>
+    <span class="eng">{{ legend }}</span>
+    <span class="eng" style="margin-left:auto">{{ footStat }}</span>
+  </div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lampColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ff9a2e&quot;,&quot;options&quot;:[&quot;#ff9a2e&quot;,&quot;#ffd24a&quot;,&quot;#5ce08a&quot;,&quot;#57b6ff&quot;,&quot;#ff5f45&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intl&quot;,&quot;wabun&quot;],&quot;default&quot;:&quot;intl&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sound&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;drill&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;keyMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;key&quot;,&quot;pad&quot;],&quot;default&quot;:&quot;key&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const INTL = {
+  "A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---",
+  "K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-",
+  "U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..",
+  "1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----",
+  ".":".-.-.-",",":"--..--","?":"..--..","/":"-..-.","=":"-...-","+":".-.-.","-":"-....-",":":"---...",
+  "(":"-.--.",")":"-.--.-","&":".-...","@":".--.-.","!":"-.-.--","\"":".-..-.","'":".----.",";":"-.-.-.","_":"..--.-"
+};
+
+const WABUN = {
+  "イ":".-","ロ":".-.-","ハ":"-...","ニ":"-.-.","ホ":"-..","ヘ":".","ト":"..-..","チ":"..-.","リ":"--.","ヌ":"....",
+  "ル":"-.--.","ヲ":".---","ワ":"-.-","カ":".-..","ヨ":"--","タ":"-.","レ":"---","ソ":"---.","ツ":".--.","ネ":"--.-",
+  "ナ":".-.","ラ":"...","ム":"-","ウ":"..-","ヰ":".-..-","ノ":"..--","オ":".-...","ク":"...-","ヤ":".--","マ":"-..-",
+  "ケ":"-.--","フ":"--..","コ":"----","エ":"-.---","テ":".-.--","ア":"--.--","サ":"-.-.-","キ":"-.-..","ユ":"-..--",
+  "メ":"-...-","ミ":"..-.-","シ":"--.-.","ヱ":".--..","ヒ":"--..-","モ":"-..-.","セ":".---.","ス":"---.-","ン":".-.-.",
+  "゛":"..","゜":"..--.","ー":".--.-","、":".-.-.-","。":".-.-.."
+};
+
+/* ══════════ 表示言語 ══════════
+   決め方の優先順位：?lang= → 手動で選んだ記憶 → /xx/ → サブドメイン
+   → アクセスされたドメインの国別トップレベル → ブラウザの設定 → en */
+const LANGS = [
+  { id: "en", name: "English",   tag: "EN" },
+  { id: "ja", name: "日本語",     tag: "JA" },
+  { id: "es", name: "Español",   tag: "ES" },
+  { id: "fr", name: "Français",  tag: "FR" },
+  { id: "de", name: "Deutsch",   tag: "DE" },
+  { id: "pt", name: "Português", tag: "PT" },
+  { id: "ru", name: "Русский",   tag: "RU" },
+  { id: "zh", name: "中文",       tag: "ZH" },
+  { id: "ko", name: "한국어",      tag: "KO" }
+];
+const HAS_LANG = {};
+LANGS.forEach((l) => { HAS_LANG[l.id] = true; });
+
+/* 国別トップレベルドメイン → 言語 */
+const TLD_LANG = {
+  jp: "ja",
+  cn: "zh", tw: "zh", hk: "zh", mo: "zh",
+  kr: "ko",
+  es: "es", mx: "es", ar: "es", cl: "es", co: "es", pe: "es", ve: "es", uy: "es",
+  fr: "fr",
+  de: "de", at: "de",
+  br: "pt", pt: "pt",
+  ru: "ru", su: "ru", by: "ru", kz: "ru", ua: "ru"
+};
+
+function langFromHost(host) {
+  const parts = String(host || "").toLowerCase().split(".");
+  if (parts.length > 1 && HAS_LANG[parts[0]]) return parts[0];         /* ja.example.com */
+  return TLD_LANG[parts[parts.length - 1]] || "";                       /* example.jp */
+}
+function readStoredLang() {
+  try { return window.localStorage.getItem("morse.lang") || ""; } catch (e) { return ""; }
+}
+function storeLang(v) {
+  try { window.localStorage.setItem("morse.lang", v); } catch (e) {}
+}
+function pickLang(loc, nav, stored) {
+  try {
+    const q = new URLSearchParams(loc.search || "").get("lang");
+    if (q && HAS_LANG[q]) return q;
+  } catch (e) {}
+  if (stored && HAS_LANG[stored]) return stored;
+  const seg = String(loc.pathname || "").split("/").filter(Boolean)[0];
+  if (seg && HAS_LANG[seg]) return seg;                                 /* /ja/ */
+  const byHost = langFromHost(loc.hostname);
+  if (byHost) return byHost;
+  const list = (nav && (nav.languages || (nav.language ? [nav.language] : []))) || [];
+  for (let i = 0; i < list.length; i++) {
+    const base = String(list[i] || "").toLowerCase().split("-")[0];
+    if (HAS_LANG[base]) return base;
+  }
+  return "en";
+}
+/* {key} を差し込む */
+function fmt(s, v) {
+  return String(s).replace(/\{(\w+)\}/g, (m, k) => (v && v[k] !== undefined ? v[k] : m));
+}
+
+const STR = {
+  en: {
+    title: "Morse Practice Set — learn Morse on a code tree",
+    sub: "Signal-Tree Practice Set · Model 1926 · No. 004-A",
+    gCode: "CODE", gMode: "MODE", gKey: "KEY", gAudio: "AUDIO", gLang: "LANG",
+    cLatin: "Latin", cWabun: "Wabun", mFree: "Free", mDrill: "Drill", kKey: "Key", kPad: "2 keys",
+    treeT: "SIGNAL TREE", treeS: "Code tree", lvRoot: "0",
+    drillT: "DRILL", drillS: "Practice",
+    dPrompt: "Send this character", dWait: "Waiting for your key", dOk: "Correct",
+    dNg: "Wrong — you sent “{c}”", dSkip: "Skip (show the answer)",
+    dStat: "Correct {a} · Wrong {b}", dPool: "Set: {a} of {b}",
+    rxT: "RECEIVED SIGNAL", rxS: "Signal", mark: "MARK",
+    stCommit: "Pause {s} s to commit — Enter commits now",
+    stNoChar: "No character at this node — keep keying",
+    stDrill: "Find the character on the tree and send it",
+    stFree: "Key in and follow the tree",
+    errDead: "No code beyond this point", errBad: "Undecodable — discarded",
+    keyT: "KEY", keyS: "Straight key", keyDown: "KEY DOWN",
+    gDot: "Dot {d}", gDash: "Dash {D}", gThr: "Threshold {n} ms", gLive: "{n} ms → {s}",
+    padDot: "DOT  ←", padDash: "DASH  →",
+    tapeT: "TAPE", tapeS: "Paper tape", tapeEmpty: "The tape is empty",
+    tapeClear: "Clear tape", tapeUndo: "Undo 1", tapeNote: "Backspace also undoes", chUnit: "CH",
+    opT: "OPERATION",
+    opKey: "Press and release the key — SPACE / SHIFT — Enter commits, Backspace undoes",
+    opPad: "← dot {d} / → dash {D} — Enter commits, Backspace undoes",
+    legend: "Tree: round = dot {d} / square = dash {D}",
+    chartL: "{set} · {a} characters · {b} nodes",
+    footStat: "{set} · {a} chars · {t} ms · {s} s",
+    dotG: "·", dashG: "–"
+  },
+  ja: {
+    title: "符号樹モールス練習器",
+    sub: "符 号 樹 練 習 器 ・ 型 1926 ・ No. 004-A",
+    gCode: "符号系", gMode: "練習", gKey: "打鍵", gAudio: "側音", gLang: "言語",
+    cLatin: "欧文", cWabun: "和文", mFree: "自由", mDrill: "出題", kKey: "長さ", kPad: "2釦",
+    treeT: "SIGNAL TREE", treeS: "符号樹", lvRoot: "根",
+    drillT: "DRILL", drillS: "出題",
+    dPrompt: "この文字を打つ", dWait: "打鍵を待っています", dOk: "正解",
+    dNg: "誤り ─ 送信は「{c}」", dSkip: "とばす（樹で答えを示す）",
+    dStat: "正解 {a} ・ 誤 {b}", dPool: "対象 {a} 字 / {b} 字",
+    rxT: "RECEIVED SIGNAL", rxS: "受信符号", mark: "MARK",
+    stCommit: "手を止めれば {s} 秒で確定（Enter で即確定）",
+    stNoChar: "この節点に文字はありません ─ 続けて打鍵",
+    stDrill: "符号樹で出題の字を探して打ってください",
+    stFree: "打鍵して符号樹をたどってください",
+    errDead: "この先に符号はありません", errBad: "解読できない符号 ─ 破棄しました",
+    keyT: "KEY", keyS: "電鍵", keyDown: "KEY DOWN",
+    gDot: "短点 {d}", gDash: "長点 {D}", gThr: "しきい値 {n} ms", gLive: "{n} ms → {s}",
+    padDot: "短 点　←", padDash: "長 点　→",
+    tapeT: "TAPE", tapeS: "記録紙", tapeEmpty: "記録紙は空です",
+    tapeClear: "記録紙を消去", tapeUndo: "1字戻す", tapeNote: "Backspace でも1字戻せます", chUnit: "CH",
+    opT: "OPERATION",
+    opKey: "電鍵を押して離す ─ SPACE / SHIFT ─ Enter で即確定、Backspace で1字戻す",
+    opPad: "← 短点 {d} ／ → 長点 {D} ─ Enter で即確定、Backspace で1字戻す",
+    legend: "符号樹　丸 ＝ 短点 {d}　／　角 ＝ 長点 {D}",
+    chartL: "{set} ・ {a} 字 ・ {b} 節点",
+    footStat: "{set} ・ {a} 字 ・ 短長 {t} ms ・ 確定 {s} 秒",
+    dotG: "・", dashG: "－"
+  },
+  es: {
+    title: "Equipo de práctica Morse — aprende con el árbol de códigos",
+    sub: "Equipo de práctica del árbol de señales · Modelo 1926 · N.º 004-A",
+    gCode: "CÓDIGO", gMode: "MODO", gKey: "MANIPULADOR", gAudio: "AUDIO", gLang: "IDIOMA",
+    cLatin: "Latino", cWabun: "Wabun", mFree: "Libre", mDrill: "Ejercicio", kKey: "Pulsación", kPad: "2 botones",
+    treeT: "ÁRBOL DE SEÑALES", treeS: "Árbol de códigos", lvRoot: "0",
+    drillT: "EJERCICIO", drillS: "Práctica",
+    dPrompt: "Transmite este carácter", dWait: "Esperando tu pulsación", dOk: "Correcto",
+    dNg: "Error — enviaste «{c}»", dSkip: "Saltar (mostrar la respuesta)",
+    dStat: "Aciertos {a} · Fallos {b}", dPool: "Conjunto: {a} de {b}",
+    rxT: "SEÑAL RECIBIDA", rxS: "Señal", mark: "MARCA",
+    stCommit: "Pausa {s} s para fijar — Intro fija ahora",
+    stNoChar: "No hay carácter en este nodo — sigue transmitiendo",
+    stDrill: "Busca el carácter en el árbol y transmítelo",
+    stFree: "Transmite y sigue el árbol",
+    errDead: "No hay código más allá", errBad: "Código indescifrable — descartado",
+    keyT: "MANIPULADOR", keyS: "Manipulador recto", keyDown: "PULSADO",
+    gDot: "Punto {d}", gDash: "Raya {D}", gThr: "Umbral {n} ms", gLive: "{n} ms → {s}",
+    padDot: "PUNTO  ←", padDash: "RAYA  →",
+    tapeT: "CINTA", tapeS: "Cinta de papel", tapeEmpty: "La cinta está vacía",
+    tapeClear: "Borrar cinta", tapeUndo: "Deshacer 1", tapeNote: "Retroceso también deshace", chUnit: "CAR",
+    opT: "MANEJO",
+    opKey: "Pulsa y suelta — ESPACIO / MAYÚS — Intro fija, Retroceso deshace",
+    opPad: "← punto {d} / → raya {D} — Intro fija, Retroceso deshace",
+    legend: "Árbol: redondo = punto {d} / cuadrado = raya {D}",
+    chartL: "{set} · {a} caracteres · {b} nodos",
+    footStat: "{set} · {a} car. · {t} ms · {s} s",
+    dotG: "·", dashG: "–"
+  },
+  fr: {
+    title: "Poste d’entraînement Morse — apprendre avec l’arbre des codes",
+    sub: "Poste d’entraînement à l’arbre des signaux · Modèle 1926 · N° 004-A",
+    gCode: "CODE", gMode: "MODE", gKey: "MANIPULATEUR", gAudio: "AUDIO", gLang: "LANGUE",
+    cLatin: "Latin", cWabun: "Wabun", mFree: "Libre", mDrill: "Exercice", kKey: "Durée", kPad: "2 touches",
+    treeT: "ARBRE DES SIGNAUX", treeS: "Arbre des codes", lvRoot: "0",
+    drillT: "EXERCICE", drillS: "Entraînement",
+    dPrompt: "Transmettez ce caractère", dWait: "En attente de votre manipulation", dOk: "Correct",
+    dNg: "Erreur — vous avez envoyé « {c} »", dSkip: "Passer (montrer la réponse)",
+    dStat: "Justes {a} · Fautes {b}", dPool: "Série : {a} sur {b}",
+    rxT: "SIGNAL REÇU", rxS: "Signal", mark: "MARQUE",
+    stCommit: "Pause de {s} s pour valider — Entrée valide tout de suite",
+    stNoChar: "Aucun caractère à ce nœud — continuez",
+    stDrill: "Trouvez le caractère sur l’arbre et transmettez-le",
+    stFree: "Manipulez et suivez l’arbre",
+    errDead: "Aucun code au-delà", errBad: "Code indéchiffrable — abandonné",
+    keyT: "MANIPULATEUR", keyS: "Manipulateur droit", keyDown: "ABAISSÉ",
+    gDot: "Point {d}", gDash: "Trait {D}", gThr: "Seuil {n} ms", gLive: "{n} ms → {s}",
+    padDot: "POINT  ←", padDash: "TRAIT  →",
+    tapeT: "BANDE", tapeS: "Bande de papier", tapeEmpty: "La bande est vide",
+    tapeClear: "Effacer la bande", tapeUndo: "Annuler 1", tapeNote: "Retour arrière annule aussi", chUnit: "CAR",
+    opT: "UTILISATION",
+    opKey: "Appuyez puis relâchez — ESPACE / MAJ — Entrée valide, Retour arrière annule",
+    opPad: "← point {d} / → trait {D} — Entrée valide, Retour arrière annule",
+    legend: "Arbre : rond = point {d} / carré = trait {D}",
+    chartL: "{set} · {a} caractères · {b} nœuds",
+    footStat: "{set} · {a} car. · {t} ms · {s} s",
+    dotG: "·", dashG: "–"
+  },
+  de: {
+    title: "Morse-Übungsgerät — Morsen am Codebaum lernen",
+    sub: "Signalbaum-Übungsgerät · Modell 1926 · Nr. 004-A",
+    gCode: "CODE", gMode: "MODUS", gKey: "TASTE", gAudio: "TON", gLang: "SPRACHE",
+    cLatin: "Latein", cWabun: "Wabun", mFree: "Frei", mDrill: "Übung", kKey: "Dauer", kPad: "2 Tasten",
+    treeT: "SIGNALBAUM", treeS: "Codebaum", lvRoot: "0",
+    drillT: "ÜBUNG", drillS: "Training",
+    dPrompt: "Dieses Zeichen geben", dWait: "Warte auf Tastung", dOk: "Richtig",
+    dNg: "Falsch — gesendet wurde „{c}“", dSkip: "Überspringen (Lösung zeigen)",
+    dStat: "Richtig {a} · Falsch {b}", dPool: "Umfang: {a} von {b}",
+    rxT: "EMPFANGENES SIGNAL", rxS: "Signal", mark: "MARKE",
+    stCommit: "{s} s Pause übernimmt — Enter übernimmt sofort",
+    stNoChar: "Hier steht kein Zeichen — weitertasten",
+    stDrill: "Zeichen im Baum suchen und geben",
+    stFree: "Tasten und dem Baum folgen",
+    errDead: "Dahinter gibt es keinen Code", errBad: "Nicht entschlüsselbar — verworfen",
+    keyT: "TASTE", keyS: "Handtaste", keyDown: "GEDRÜCKT",
+    gDot: "Punkt {d}", gDash: "Strich {D}", gThr: "Schwelle {n} ms", gLive: "{n} ms → {s}",
+    padDot: "PUNKT  ←", padDash: "STRICH  →",
+    tapeT: "STREIFEN", tapeS: "Papierstreifen", tapeEmpty: "Der Streifen ist leer",
+    tapeClear: "Streifen löschen", tapeUndo: "1 zurück", tapeNote: "Rücktaste macht dasselbe", chUnit: "Z",
+    opT: "BEDIENUNG",
+    opKey: "Taste drücken und loslassen — LEER / UMSCHALT — Enter übernimmt, Rücktaste zurück",
+    opPad: "← Punkt {d} / → Strich {D} — Enter übernimmt, Rücktaste zurück",
+    legend: "Baum: rund = Punkt {d} / eckig = Strich {D}",
+    chartL: "{set} · {a} Zeichen · {b} Knoten",
+    footStat: "{set} · {a} Z. · {t} ms · {s} s",
+    dotG: "·", dashG: "–"
+  },
+  pt: {
+    title: "Aparelho de prática de Morse — aprenda pela árvore de códigos",
+    sub: "Aparelho de prática da árvore de sinais · Modelo 1926 · N.º 004-A",
+    gCode: "CÓDIGO", gMode: "MODO", gKey: "MANIPULADOR", gAudio: "ÁUDIO", gLang: "IDIOMA",
+    cLatin: "Latino", cWabun: "Wabun", mFree: "Livre", mDrill: "Exercício", kKey: "Duração", kPad: "2 botões",
+    treeT: "ÁRVORE DE SINAIS", treeS: "Árvore de códigos", lvRoot: "0",
+    drillT: "EXERCÍCIO", drillS: "Prática",
+    dPrompt: "Transmita este caractere", dWait: "Aguardando o manipulador", dOk: "Correto",
+    dNg: "Errado — você enviou “{c}”", dSkip: "Pular (mostrar a resposta)",
+    dStat: "Acertos {a} · Erros {b}", dPool: "Conjunto: {a} de {b}",
+    rxT: "SINAL RECEBIDO", rxS: "Sinal", mark: "MARCA",
+    stCommit: "Pare {s} s para confirmar — Enter confirma já",
+    stNoChar: "Não há caractere neste nó — continue",
+    stDrill: "Ache o caractere na árvore e transmita",
+    stFree: "Manipule e siga a árvore",
+    errDead: "Não há código além daqui", errBad: "Código indecifrável — descartado",
+    keyT: "MANIPULADOR", keyS: "Manipulador reto", keyDown: "PRESSIONADO",
+    gDot: "Ponto {d}", gDash: "Traço {D}", gThr: "Limiar {n} ms", gLive: "{n} ms → {s}",
+    padDot: "PONTO  ←", padDash: "TRAÇO  →",
+    tapeT: "FITA", tapeS: "Fita de papel", tapeEmpty: "A fita está vazia",
+    tapeClear: "Limpar fita", tapeUndo: "Desfazer 1", tapeNote: "Backspace também desfaz", chUnit: "CAR",
+    opT: "OPERAÇÃO",
+    opKey: "Pressione e solte — ESPAÇO / SHIFT — Enter confirma, Backspace desfaz",
+    opPad: "← ponto {d} / → traço {D} — Enter confirma, Backspace desfaz",
+    legend: "Árvore: redondo = ponto {d} / quadrado = traço {D}",
+    chartL: "{set} · {a} caracteres · {b} nós",
+    footStat: "{set} · {a} car. · {t} ms · {s} s",
+    dotG: "·", dashG: "–"
+  },
+  ru: {
+    title: "Морзянка — тренажёр с деревом кодов",
+    sub: "Тренажёр «дерево сигналов» · модель 1926 · № 004-A",
+    gCode: "КОД", gMode: "РЕЖИМ", gKey: "КЛЮЧ", gAudio: "ЗВУК", gLang: "ЯЗЫК",
+    cLatin: "Латиница", cWabun: "Вабун", mFree: "Свободно", mDrill: "Задание", kKey: "Длительность", kPad: "2 кнопки",
+    treeT: "ДЕРЕВО СИГНАЛОВ", treeS: "Дерево кодов", lvRoot: "0",
+    drillT: "ЗАДАНИЕ", drillS: "Тренировка",
+    dPrompt: "Передайте этот знак", dWait: "Ожидание передачи", dOk: "Верно",
+    dNg: "Ошибка — передано «{c}»", dSkip: "Пропустить (показать ответ)",
+    dStat: "Верно {a} · Ошибок {b}", dPool: "Набор: {a} из {b}",
+    rxT: "ПРИНЯТЫЙ СИГНАЛ", rxS: "Сигнал", mark: "МЕТКА",
+    stCommit: "Пауза {s} с — знак принят (Enter сразу)",
+    stNoChar: "В этом узле нет знака — продолжайте",
+    stDrill: "Найдите знак на дереве и передайте его",
+    stFree: "Передавайте и следите по дереву",
+    errDead: "Дальше кода нет", errBad: "Нерасшифруемый код — отброшен",
+    keyT: "КЛЮЧ", keyS: "Простой ключ", keyDown: "НАЖАТ",
+    gDot: "Точка {d}", gDash: "Тире {D}", gThr: "Порог {n} мс", gLive: "{n} мс → {s}",
+    padDot: "ТОЧКА  ←", padDash: "ТИРЕ  →",
+    tapeT: "ЛЕНТА", tapeS: "Бумажная лента", tapeEmpty: "Лента пуста",
+    tapeClear: "Очистить ленту", tapeUndo: "Назад на 1", tapeNote: "Backspace тоже отменяет", chUnit: "ЗН",
+    opT: "УПРАВЛЕНИЕ",
+    opKey: "Нажать и отпустить — ПРОБЕЛ / SHIFT — Enter принимает, Backspace отменяет",
+    opPad: "← точка {d} / → тире {D} — Enter принимает, Backspace отменяет",
+    legend: "Дерево: круг = точка {d} / квадрат = тире {D}",
+    chartL: "{set} · {a} знаков · {b} узлов",
+    footStat: "{set} · {a} зн. · {t} мс · {s} с",
+    dotG: "·", dashG: "–"
+  },
+  zh: {
+    title: "莫尔斯电码练习器 — 用码树学习",
+    sub: "码树练习器 · 1926 型 · No. 004-A",
+    gCode: "码制", gMode: "模式", gKey: "电键", gAudio: "侧音", gLang: "语言",
+    cLatin: "拉丁", cWabun: "和文", mFree: "自由", mDrill: "出题", kKey: "按键时长", kPad: "双键",
+    treeT: "码树", treeS: "信号树", lvRoot: "0",
+    drillT: "出题", drillS: "练习",
+    dPrompt: "请发送此字符", dWait: "等待发报", dOk: "正确",
+    dNg: "错误 — 你发出的是「{c}」", dSkip: "跳过（在树上显示答案）",
+    dStat: "正确 {a} · 错误 {b}", dPool: "范围：{a} / {b} 字",
+    rxT: "接收信号", rxS: "信号", mark: "标记",
+    stCommit: "停手 {s} 秒即确定（Enter 立即确定）",
+    stNoChar: "此节点没有字符 — 继续发报",
+    stDrill: "在码树上找到该字符并发送",
+    stFree: "发报并沿码树前进",
+    errDead: "再往下没有码了", errBad: "无法解码 — 已丢弃",
+    keyT: "电键", keyS: "手键", keyDown: "按下",
+    gDot: "点 {d}", gDash: "划 {D}", gThr: "阈值 {n} 毫秒", gLive: "{n} 毫秒 → {s}",
+    padDot: "点  ←", padDash: "划  →",
+    tapeT: "纸带", tapeS: "记录纸", tapeEmpty: "纸带是空的",
+    tapeClear: "清除纸带", tapeUndo: "退一字", tapeNote: "Backspace 也可退一字", chUnit: "字",
+    opT: "操作",
+    opKey: "按下并松开电键 — 空格 / SHIFT — Enter 立即确定，Backspace 退一字",
+    opPad: "← 点 {d} ／ → 划 {D} — Enter 立即确定，Backspace 退一字",
+    legend: "码树　圆 ＝ 点 {d}　／　方 ＝ 划 {D}",
+    chartL: "{set} · {a} 字 · {b} 节点",
+    footStat: "{set} · {a} 字 · 阈值 {t} 毫秒 · 确定 {s} 秒",
+    dotG: "·", dashG: "–"
+  },
+  ko: {
+    title: "모스 부호 연습기 — 부호 나무로 배우기",
+    sub: "부호 나무 연습기 · 1926년형 · No. 004-A",
+    gCode: "부호계", gMode: "모드", gKey: "전건", gAudio: "측음", gLang: "언어",
+    cLatin: "라틴", cWabun: "일문", mFree: "자유", mDrill: "출제", kKey: "누름 길이", kPad: "두 버튼",
+    treeT: "부호 나무", treeS: "신호 나무", lvRoot: "0",
+    drillT: "출제", drillS: "연습",
+    dPrompt: "이 글자를 보내세요", dWait: "타건을 기다립니다", dOk: "정답",
+    dNg: "오답 — 보낸 것은 “{c}”", dSkip: "건너뛰기(나무에 답 표시)",
+    dStat: "정답 {a} · 오답 {b}", dPool: "범위: {a} / {b} 자",
+    rxT: "수신 부호", rxS: "신호", mark: "마크",
+    stCommit: "{s} 초 멈추면 확정 (Enter 즉시 확정)",
+    stNoChar: "이 마디에는 글자가 없습니다 — 계속 타건",
+    stDrill: "나무에서 글자를 찾아 보내세요",
+    stFree: "타건하며 나무를 따라가세요",
+    errDead: "이 앞으로는 부호가 없습니다", errBad: "해독 불가 — 버렸습니다",
+    keyT: "전건", keyS: "수동 전건", keyDown: "눌림",
+    gDot: "짧게 {d}", gDash: "길게 {D}", gThr: "기준 {n} ms", gLive: "{n} ms → {s}",
+    padDot: "짧게  ←", padDash: "길게  →",
+    tapeT: "기록지", tapeS: "종이 테이프", tapeEmpty: "기록지가 비어 있습니다",
+    tapeClear: "기록지 지우기", tapeUndo: "한 자 되돌리기", tapeNote: "Backspace로도 되돌립니다", chUnit: "자",
+    opT: "조작",
+    opKey: "전건을 눌렀다 떼기 — SPACE / SHIFT — Enter 즉시 확정, Backspace 한 자 되돌리기",
+    opPad: "← 짧게 {d} / → 길게 {D} — Enter 즉시 확정, Backspace 되돌리기",
+    legend: "부호 나무　동그라미 ＝ 짧게 {d}　/　네모 ＝ 길게 {D}",
+    chartL: "{set} · {a} 자 · {b} 마디",
+    footStat: "{set} · {a} 자 · 기준 {t} ms · 확정 {s} 초",
+    dotG: "·", dashG: "–"
+  }
+};
+
+/* ─ 符号樹の寸法（viewBox の中の座標）─
+   P = 葉と葉の横間隔、G = 段の縦間隔。囲みは 丸＝短点 / 角＝長点。 */
+const P = 42, G = 126, PADX = 62, PADY = 40;
+const FS_CHAR = 17, FS_CUR = 19;
+
+/* ─ モールスの標準時間（ITU-R M.1677）─
+   基準単位 = 短点1個ぶんの長さ。unit[ms] = 1200 / 速度[WPM]。
+   短点 1 / 長点 3 / 文字内の間 1 / 文字間 3 / 語間 7（いずれも単位の倍数）。
+   初期値 12 WPM は電信の学習・検定でひろく使われる速度（unit = 100 ms）。 */
+const WPM = 12;                  /* 符号そのものの速度は固定（12 WPM）*/
+const UNIT = 1200 / WPM;         /* 単位長 100 ms */
+const THR_MS = 2 * UNIT;         /* 短点と長点の境目 200 ms（規格どおり）*/
+/* 文字の確定と語間だけを大きく広げる。符号を探しながら打つ人のための
+   「ファーンズワース間隔」。符号の形は規格どおりのまま、考える時間を作る。 */
+const LETTER_MS = 1500;          /* 手を止めてから文字が確定するまで */
+const WORD_MS = 4000;            /* さらに待つと空白が入る */
+const DRILL_START = 6;           /* 出題の対象は短い符号 6 字から */
+const DRILL_STEP = 4;            /* 正解 4 回ごとに 2 字ずつ増やす */
+
+const r2 = (v) => Math.round(v * 100) / 100;
+
+class Component extends DCLogic {
+  state = {
+    code: "", text: "", lang: null, sound: null, err: "",
+    holding: false, hold: 0, mark: false,
+    mode: null, keyMode: null,
+    ui: pickLang(window.location, window.navigator, readStoredLang()), langOpen: false,
+    target: "", sent: "", judge: "", reveal: "", correct: 0, wrong: 0
+  };
+  tapeRef = React.createRef();
+  _cache = {};
+  _prevText = "";
+
+  /* ───────── 起動と後始末 ───────── */
+  componentDidMount() {
+    this._onDown = (e) => {
+      if (e.repeat) return;
+      const k = e.key;
+      if (k === "ArrowLeft")  { e.preventDefault(); this.emit("."); }
+      else if (k === "ArrowRight") { e.preventDefault(); this.emit("-"); }
+      else if (k === "Enter")      { e.preventDefault(); this.commitNow(); }
+      else if (k === "Backspace")  { e.preventDefault(); this.back(); }
+      else if ((k === " " || k === "Shift") && this.keyMode() === "key") { e.preventDefault(); this.startKey(); }
+    };
+    this._onUp = (e) => {
+      if ((e.key === " " || e.key === "Shift") && this.keyMode() === "key") { e.preventDefault(); this.endKey(); }
+    };
+    this._outside = (e) => {
+      if (!this.state.langOpen) return;
+      const el = e.target;
+      if (!(el && el.closest && el.closest(".langbox"))) this.setState({ langOpen: false });
+    };
+    window.addEventListener("keydown", this._onDown);
+    window.addEventListener("keyup", this._onUp);
+    document.addEventListener("pointerdown", this._outside, true);
+    this.applyLang();
+  }
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this._onDown);
+    window.removeEventListener("keyup", this._onUp);
+    document.removeEventListener("pointerdown", this._outside, true);
+    clearInterval(this._tick);
+    this.clearGaps();
+    clearTimeout(this._errT);
+    clearTimeout(this._markT);
+    clearTimeout(this._nextT);
+    clearTimeout(this._revT);
+  }
+  applyLang() {
+    try {
+      document.documentElement.setAttribute("lang", this.state.ui);
+      document.title = this.L().title;
+    } catch (e) {}
+  }
+  componentDidUpdate() {
+    if (this._prevUi !== this.state.ui) { this._prevUi = this.state.ui; this.applyLang(); }
+    if (this.state.text === this._prevText) return;
+    this._prevText = this.state.text;
+    const el = this.tapeRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  /* ───────── 設定値 ───────── */
+  lang() { return this.state.lang ?? (this.props.lang ?? "intl"); }
+  /** 表示言語の文言。足りない項目は英語で埋める */
+  L() {
+    const id = this.state.ui;
+    if (this._strId !== id) { this._str = Object.assign({}, STR.en, STR[id] || {}); this._strId = id; }
+    return this._str;
+  }
+  setLang(id) {
+    return () => { storeLang(id); this.setState({ ui: id, langOpen: false }); };
+  }
+  toggleLangMenu = () => this.setState({ langOpen: !this.state.langOpen });
+  mode() { return this.state.mode ?? (this.props.mode ?? "free"); }
+  isDrill() { return this.mode() === "drill"; }
+  keyMode() { return this.state.keyMode ?? (this.props.keyMode ?? "key"); }
+  soundOn() { return this.state.sound ?? (this.props.sound !== false); }
+  lamp() { return this.props.lampColor ?? "#ff9a2e"; }
+
+  unit()     { return UNIT; }
+  thrMs()    { return THR_MS; }
+  letterMs() { return LETTER_MS; }
+  wordMs()   { return WORD_MS; }
+
+  /* ───────── 符号樹（言語ごとに一度だけ組む） ───────── */
+  tree() {
+    const lang = this.lang();
+    if (this._cache[lang]) return this._cache[lang];
+    const map = lang === "wabun" ? WABUN : INTL;
+    const byCode = {};
+    Object.keys(map).forEach((ch) => { byCode[map[ch]] = ch; });
+    const exists = new Set([""]);
+    Object.keys(byCode).forEach((c) => { for (let i = 1; i <= c.length; i++) exists.add(c.slice(0, i)); });
+    const kidsOf = (c) => [c + ".", c + "-"].filter((k) => exists.has(k));
+
+    let maxD = 0;
+    exists.forEach((c) => { if (c.length > maxD) maxD = c.length; });
+
+    /* 葉を左から順に並べ、親は子の中央に置く（整然配置） */
+    let leaves = 0;
+    const pos = {};
+    const walk = (c) => {
+      const k = kidsOf(c);
+      let x;
+      if (!k.length) { x = leaves * P; leaves++; }
+      else { const xs = k.map(walk); x = (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2; }
+      pos[c] = { x: x + PADX, y: c.length * G + PADY, d: c.length };
+      return x;
+    };
+    walk("");
+
+    let maxX = 0;
+    exists.forEach((c) => { if (pos[c].x > maxX) maxX = pos[c].x; });
+
+    /* 出題は符号の短い順から。コッホ法のように、易しい字から対象を広げる */
+    const order = Object.keys(map).sort((a, b) =>
+      map[a].length - map[b].length || (map[a] < map[b] ? -1 : 1));
+
+    const t = {
+      byCode: byCode, codeOf: map, order: order,
+      exists: exists, pos: pos, maxD: maxD,
+      w: maxX + PADX, h: maxD * G + PADY * 2,
+      chars: Object.keys(map).length, nodes: exists.size
+    };
+    this._cache[lang] = t;
+    return t;
+  }
+
+  /* ───────── 音（側音） ───────── */
+  ctx() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    this._ac = this._ac || new AC();
+    if (this._ac.state === "suspended") this._ac.resume();
+    return this._ac;
+  }
+  /** 短点・長点それぞれ音程と長さを変えた電子ブザー音 */
+  beep(sym) {
+    if (!this.soundOn()) return;
+    try {
+      const ctx = this.ctx();
+      if (!ctx) return;
+      const u = this.unit() / 1000;
+      const dur = Math.max(0.06, Math.min(0.26, sym === "." ? u : u * 3));
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+      const t0 = ctx.currentTime;
+      o.type = "sine";     o.frequency.value  = sym === "." ? 880 : 588;
+      o2.type = "triangle"; o2.frequency.value = sym === "." ? 1760 : 1176;
+      const g2 = ctx.createGain(); g2.gain.value = 0.10;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.24, t0 + 0.006);
+      g.gain.setValueAtTime(0.24, t0 + dur);
+      g.gain.exponentialRampToValueAtTime(0.0004, t0 + dur + 0.04);
+      o.connect(g); o2.connect(g2); g2.connect(g); g.connect(ctx.destination);
+      o.start(t0); o2.start(t0); o.stop(t0 + dur + 0.07); o2.stop(t0 + dur + 0.07);
+    } catch (e) {}
+  }
+  /** 文字が確定したときの継電器の打音 */
+  clack() {
+    if (!this.soundOn()) return;
+    try {
+      const ctx = this.ctx();
+      if (!ctx) return;
+      const n = Math.floor(ctx.sampleRate * 0.045);
+      const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 7);
+      const s = ctx.createBufferSource(); s.buffer = buf;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 2100; bp.Q.value = 1.1;
+      const g = ctx.createGain(); g.gain.value = 0.55;
+      s.connect(bp); bp.connect(g); g.connect(ctx.destination);
+      s.start();
+    } catch (e) {}
+  }
+  /** 出題に正解したときの二音 */
+  chime() {
+    if (!this.soundOn()) return;
+    try {
+      const ctx = this.ctx();
+      if (!ctx) return;
+      [[880, 0], [1320, 0.09]].forEach((n) => {
+        const o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime + n[1];
+        o.type = "sine"; o.frequency.value = n[0];
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.20, t0 + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0004, t0 + 0.16);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0 + 0.2);
+      });
+    } catch (e) {}
+  }
+
+  /** 行き止まり・解読不能のときの低いブザー */
+  buzz() {
+    if (!this.soundOn()) return;
+    try {
+      const ctx = this.ctx();
+      if (!ctx) return;
+      const o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime;
+      o.type = "square"; o.frequency.value = 138;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.10, t0 + 0.01);
+      g.gain.setValueAtTime(0.10, t0 + 0.10);
+      g.gain.exponentialRampToValueAtTime(0.0004, t0 + 0.15);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0 + 0.18);
+    } catch (e) {}
+  }
+
+  /* ───────── 打鍵と自動確定 ───────── */
+  clearGaps() { clearTimeout(this._letterT); clearTimeout(this._wordT); }
+  armLetter() {
+    this.clearGaps();
+    this._letterT = setTimeout(this.autoCommit, this.letterMs());
+  }
+
+  startKey = () => {
+    if (this.state.holding) return;
+    this.clearGaps();
+    this._t0 = Date.now();
+    this.setState({ holding: true, hold: 0, err: "" });
+    clearInterval(this._tick);
+    this._tick = setInterval(() => this.setState({ hold: Date.now() - this._t0 }), 25);
+  };
+  endKey = () => {
+    if (!this.state.holding) return;
+    clearInterval(this._tick);
+    const dur = Date.now() - this._t0;
+    const sym = dur < this.thrMs() ? "." : "-";
+    this.setState({ holding: false, hold: 0 });
+    this.emit(sym);
+  };
+
+  /** 短点／長点を1つ送る（電鍵からでも釦からでも同じ道を通る）*/
+  emit = (sym) => { this.beep(sym); this.push(sym); };
+  pressDot = () => this.emit(".");
+  pressDash = () => this.emit("-");
+  keyDown = (e) => { if (e && e.preventDefault) e.preventDefault(); this.startKey(); };
+  keyUp = () => this.endKey();
+  noMenu = (e) => { if (e && e.preventDefault) e.preventDefault(); };
+
+  push(sym) {
+    const t = this.tree();
+    const next = this.state.code + sym;
+    if (!t.exists.has(next)) {
+      this.buzz();
+      this.flash(this.L().errDead);
+      this.armLetter();
+      return;
+    }
+    this.setState({ code: next, err: "", judge: "" });
+    this.armLetter();
+  }
+
+  /** 待たずにその場で確定する（Enter）*/
+  commitNow = () => { if (this.state.code) { this.clearGaps(); this.autoCommit(); } };
+
+  /** 文字間ぶん無操作が続いたら、たどり着いた節点の文字を記録紙へ送る */
+  autoCommit = () => {
+    const t = this.tree(), code = this.state.code;
+    if (!code) return;
+    const ch = t.byCode[code];
+    if (ch) {
+      this.setState({ text: this.state.text + ch, code: "", err: "", mark: true });
+      clearTimeout(this._markT);
+      this._markT = setTimeout(() => this.setState({ mark: false }), 170);
+      if (this.isDrill()) this.mark(ch); else this.clack();
+    } else {
+      this.buzz();
+      this.setState({ code: "" });
+      this.flash(this.L().errBad);
+    }
+    this._wordT = setTimeout(this.autoSpace, Math.max(80, this.wordMs() - this.letterMs()));
+  };
+  /** さらに語間ぶん無操作が続いたら空白を1つ入れる */
+  autoSpace = () => {
+    const s = this.state.text;
+    if (!s || s.slice(-1) === " ") return;
+    this.setState({ text: s + " " });
+  };
+
+  /** 符号の途中なら1つ戻す。何もなければ記録紙の末尾を1字消す */
+  back = () => {
+    if (this.state.code) { this.clearGaps(); this.setState({ code: this.state.code.slice(0, -1), err: "" }); return; }
+    if (this.state.text) this.setState({ text: this.state.text.slice(0, -1), err: "" });
+  };
+
+  /* ───────── 出題 ───────── */
+  /** 対象の字数。正解が増えるほど広がる */
+  poolSize() {
+    const t = this.tree();
+    return Math.min(t.order.length, DRILL_START + Math.floor(this.state.correct / DRILL_STEP) * 2);
+  }
+  nextTarget() {
+    const t = this.tree(), n = this.poolSize();
+    let ch = this.state.target;
+    for (let i = 0; i < 16 && ch === this.state.target; i++) ch = t.order[Math.floor(Math.random() * n)];
+    this.setState({ target: ch, judge: "", sent: "", reveal: "" });
+  }
+  /** 送った字を出題と照合する */
+  mark(ch) {
+    if (!this.state.target) { this.clack(); return; }
+    if (ch === this.state.target) {
+      this.chime();
+      this.setState({ correct: this.state.correct + 1, judge: "ok", sent: ch });
+      clearTimeout(this._nextT);
+      this._nextT = setTimeout(() => this.nextTarget(), 750);
+    } else {
+      this.buzz();
+      this.setState({ wrong: this.state.wrong + 1, judge: "ng", sent: ch });
+      this.showAnswer();
+    }
+  }
+  /** 正解の経路を符号樹の上に一時的に示す */
+  showAnswer() {
+    const t = this.tree(), code = t.codeOf[this.state.target];
+    if (!code) return;
+    this.setState({ reveal: code });
+    clearTimeout(this._revT);
+    this._revT = setTimeout(() => this.setState({ reveal: "" }), 2600);
+  }
+  skip = () => {
+    this.showAnswer();
+    clearTimeout(this._nextT);
+    this._nextT = setTimeout(() => this.nextTarget(), 1800);
+  };
+
+  setFree = () => this.setState({ mode: "free", judge: "", reveal: "" });
+  setDrill = () => this.setState({ mode: "drill" }, () => { if (!this.state.target) this.nextTarget(); });
+  setKeyMode = () => this.setState({ keyMode: "key" });
+  setPadMode = () => this.setState({ keyMode: "pad" });
+
+  pick(c) {
+    return () => {
+      this.setState({ code: c, err: "" });
+      if (c) this.armLetter(); else this.clearGaps();
+    };
+  }
+  toRoot = () => { this.clearGaps(); this.setState({ code: "", err: "" }); };
+  reset = () => { this.clearGaps(); this.setState({ text: "", code: "", err: "" }); };
+
+  flash(msg) {
+    this.setState({ err: msg });
+    clearTimeout(this._errT);
+    this._errT = setTimeout(() => this.setState({ err: "" }), 1500);
+  }
+
+  setIntl  = () => this.switchLang("intl");
+  setWabun = () => this.switchLang("wabun");
+  switchLang(l) {
+    this.clearGaps();
+    clearTimeout(this._nextT); clearTimeout(this._revT);
+    this.setState({ lang: l, code: "", err: "", target: "", judge: "", sent: "", reveal: "", correct: 0, wrong: 0 },
+      () => { if (this.isDrill()) this.nextTarget(); });
+  }
+  toggleSound = () => this.setState({ sound: !this.soundOn() });
+
+  /* ───────── 描画のための組み立て ───────── */
+  /** 節点の囲み：丸＝短点でたどり着いた、角＝長点でたどり着いた。
+      文字のない中継点は小さく描く。 */
+  box(c, isCur, hasChar) {
+    if (c === "") return { w: 40, h: 40, rx: 20 };
+    const dash = c.slice(-1) === "-";
+    if (!hasChar) {
+      if (dash) return isCur ? { w: 27, h: 17, rx: 3 } : { w: 19, h: 11, rx: 2 };
+      return isCur ? { w: 22, h: 22, rx: 11 } : { w: 14, h: 14, rx: 7 };
+    }
+    if (dash) return isCur ? { w: 40, h: 29, rx: 4 } : { w: 36, h: 26, rx: 3 };
+    return isCur ? { w: 39, h: 39, rx: 19.5 } : { w: 34, h: 34, rx: 17 };
+  }
+
+  /** 親の下端から下り、横に振り、子の上端へ下りる直角の枝 */
+  edgePath(p, pb, q, cb) {
+    const my = p.y + Math.round(G * 0.56);
+    return "M " + r2(p.x) + " " + r2(p.y + pb.h / 2) +
+      " L " + r2(p.x) + " " + my +
+      " L " + r2(q.x) + " " + my +
+      " L " + r2(q.x) + " " + r2(q.y - cb.h / 2);
+  }
+
+  renderVals() {
+    const L = this.L();
+    const lamp = this.lamp();
+    const t = this.tree();
+    const code = this.state.code;
+    const holding = this.state.holding;
+    const hold = this.state.hold;
+    const unit = this.unit(), thr = this.thrMs(), lgap = this.letterMs(), wgap = this.wordMs();
+
+    const onPath = new Set([""]);
+    for (let i = 1; i <= code.length; i++) onPath.add(code.slice(0, i));
+    const rev = this.state.reveal;      /* 出題の答えを示す経路 */
+    const ANS = "#4fd3a0";
+
+    /* 節点と枝 */
+    const treeNodes = [], treeEdges = [], edgeMarks = [];
+    t.exists.forEach((c) => {
+      if (c === "") return;
+      const q = t.pos[c];
+      const isCur = c === code;
+      const inPath = onPath.has(c);
+      const isNext = c.length === code.length + 1 && c.slice(0, code.length) === code;
+      const onAns = rev && c.length <= rev.length && rev.slice(0, c.length) === c;
+      const isAns = c === rev;
+      const ch = t.byCode[c] || "";
+      const cb = this.box(c, isCur, !!ch);
+
+      const pc = c.slice(0, -1), p = t.pos[pc];
+      if (p) {
+        const pb = this.box(pc, pc === code, !!t.byCode[pc]);
+        const isDot = c.slice(-1) === ".";
+        const base = isDot ? 1.8 : 3.8;   /* 細線＝短点 / 太線＝長点 */
+        treeEdges.push({
+          d: this.edgePath(p, pb, q, cb),
+          stroke: onAns ? ANS : inPath ? lamp : isNext ? "#b6c2cc" : "#7c8a97",
+          w: onAns || inPath ? base + 1.5 : isNext ? base + 0.8 : base
+        });
+        if (inPath || isNext) {
+          const my = p.y + Math.round(G * 0.56);
+          edgeMarks.push({
+            cx: r2(q.x), cy: r2((my + q.y - cb.h / 2) / 2),
+            sym: [isDot ? L.dotG : L.dashG],
+            fill: inPath ? lamp : "#8d9aa5",
+            stroke: inPath ? lamp : "#3a444e"
+          });
+        }
+      }
+
+      treeNodes.push({
+        x: r2(q.x - cb.w / 2), y: r2(q.y - cb.h / 2), w: cb.w, h: cb.h, rx: cb.rx,
+        cx: r2(q.x), cy: r2(q.y),
+        fill:   isAns ? ANS : isCur ? lamp : onAns ? "#123a2c" : inPath ? "#3f2d12" : ch ? "#1c232b" : "#46525d",
+        stroke: isAns ? "#d8fff0" : onAns ? ANS : isCur ? "#ffe6bf" : inPath ? lamp : isNext ? lamp : ch ? "#4b5966" : "#5d6a76",
+        sw:     isAns || isCur ? 3 : onAns || inPath ? 2.4 : isNext ? 2 : 1.1,
+        dash:   isNext && !inPath && !onAns ? "4 4" : "0",
+        char:   [ch],
+        fs:     isAns || isCur ? FS_CUR : FS_CHAR,
+        tf:     isAns ? "#042016" : isCur ? "#1c1305" : onAns ? ANS : ch ? "#dde5ec" : "transparent",
+        onClick: this.pick(c)
+      });
+    });
+
+    /* 段の目安線と段番号 */
+    const levelRules = [];
+    for (let d = 0; d <= t.maxD; d++) {
+      const y = d * G + PADY;
+      levelRules.push({
+        y: y, x1: 40, x2: r2(t.w - 12),
+        lx: 8, ly: y - 9.5, tx: 21,
+        t: [d === 0 ? L.lvRoot : String(d)]
+      });
+    }
+
+    const curChar = t.byCode[code];
+    const overThr = hold >= thr;
+    const isIntl = this.lang() === "intl";
+    const soundOn = this.soundOn();
+    const drill = this.isDrill();
+    const padMode = this.keyMode() === "pad";
+    const setName = isIntl ? L.cLatin : L.cWabun;
+
+    return {
+      lamp: lamp,
+      L: L,
+      uiFont: this.state.ui === "ja"
+        ? "'BIZ UDPGothic','Barlow Condensed',system-ui,sans-serif"
+        : "system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue','BIZ UDPGothic',sans-serif",
+      langTag: (LANGS.filter((x) => x.id === this.state.ui)[0] || LANGS[0]).tag,
+      langOpen: this.state.langOpen,
+      toggleLangMenu: this.toggleLangMenu,
+      langList: LANGS.map((x) => ({
+        name: x.name, cls: x.id === this.state.ui ? "on" : "", onClick: this.setLang(x.id)
+      })),
+
+      /* 頭部 */
+      tabIntlCls:  "btn" + (isIntl ? " on" : ""),
+      tabWabunCls: "btn" + (isIntl ? "" : " on"),
+      soundCls: "btn ico" + (soundOn ? " on" : ""),
+      tabFreeCls:  "btn" + (drill ? "" : " on"),
+      tabDrillCls: "btn" + (drill ? " on" : ""),
+      tabKeyCls:   "btn" + (padMode ? "" : " on"),
+      tabPadCls:   "btn" + (padMode ? " on" : ""),
+      setFree: this.setFree, setDrill: this.setDrill,
+      setKeyMode: this.setKeyMode, setPadMode: this.setPadMode,
+
+      /* 出題 */
+      isDrill: drill,
+      target: this.state.target || "—",
+      judgeCls: "judge" + (this.state.judge ? " " + this.state.judge : ""),
+      judgeText: this.state.judge === "ok" ? L.dOk
+               : this.state.judge === "ng" ? fmt(L.dNg, { c: this.state.sent })
+               : L.dWait,
+      drillStat: fmt(L.dStat, { a: this.state.correct, b: this.state.wrong }),
+      poolLabel: fmt(L.dPool, { a: this.poolSize(), b: t.chars }),
+      skip: this.skip,
+      soundOn: soundOn, soundOff: !soundOn,
+      audioLedCls: "led" + (soundOn ? " on" : ""),
+      setIntl: this.setIntl, setWabun: this.setWabun, toggleSound: this.toggleSound,
+
+      /* 符号樹 */
+      treeNodes: treeNodes, treeEdges: treeEdges, edgeMarks: edgeMarks, levelRules: levelRules,
+      viewBox: "0 0 " + r2(t.w) + " " + r2(t.h),
+      rootX: r2(t.pos[""].x), rootY: r2(t.pos[""].y),
+      toRoot: this.toRoot,
+      chartLabel: fmt(L.chartL, { set: setName, a: t.chars, b: t.nodes }),
+
+      /* 受信符号 */
+      sigGlyphs: code ? code.split("").map((s) => (s === "." ? L.dotG : L.dashG)).join(" ") : "—",
+      sigCls: "sig" + (code ? "" : " idle"),
+      curChar: curChar || "—",
+      glyphCls: "glyph" + (curChar ? "" : " idle"),
+      statusText: this.state.err ||
+        (curChar ? fmt(L.stCommit, { s: (lgap / 1000).toFixed(1) })
+                 : code ? L.stNoChar
+                        : drill ? L.stDrill : L.stFree),
+      statusCls: "status " + (this.state.err ? "err" : "ok"),
+      markLedCls: "led" + (this.state.mark ? " on" : ""),
+
+      /* 電鍵 */
+      keyDown: this.keyDown, keyUp: this.keyUp, noMenu: this.noMenu,
+      isKeyMode: !padMode, isPadMode: padMode,
+      pressDot: this.pressDot, pressDash: this.pressDash,
+      back: this.back,
+      keyBtnCls: "keybtn" + (holding ? (overThr ? " down long" : " down") : ""),
+      keyLedCls: "led red" + (holding ? " on" : ""),
+      gaugeFillStyle: "width:" + r2(Math.min(100, (hold / (4 * unit)) * 100)) + "%;background:" +
+        (overThr ? lamp : "#3f9d78") + ";box-shadow:0 0 9px " + (overThr ? lamp : "#3f9d78"),
+      gDotLab: fmt(L.gDot, { d: L.dotG }),
+      gDashLab: fmt(L.gDash, { D: L.dashG }),
+      gaugeLabel: holding
+        ? fmt(L.gLive, { n: Math.round(hold), s: overThr ? fmt(L.gDash, { D: L.dashG }) : fmt(L.gDot, { d: L.dotG }) })
+        : fmt(L.gThr, { n: Math.round(thr) }),
+
+
+      /* 記録紙 */
+      tapeRef: this.tapeRef,
+      tapeText: this.state.text || L.tapeEmpty,
+      tapeCls: "tape" + (this.state.text ? "" : " empty"),
+      tapeCount: this.state.text.length + " " + L.chUnit,
+      reset: this.reset,
+      autoNote: L.tapeNote,
+
+      opHint: padMode ? fmt(L.opPad, { d: L.dotG, D: L.dashG }) : L.opKey,
+      legend: fmt(L.legend, { d: L.dotG, D: L.dashG }),
+      footStat: fmt(L.footStat, { set: setName, a: t.chars, t: Math.round(thr), s: (lgap / 1000).toFixed(1) })
+    };
+  }
+}
+</script>
+</body>
+</html>

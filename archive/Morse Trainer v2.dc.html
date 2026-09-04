@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Oswald:wght@300;400;500&family=Shippori+Mincho:wght@500;700&display=swap" />
+<style>
+  body { margin: 0; background: #2a2018; }
+  a { color: oklch(0.52 0.13 45); }
+  a:hover { color: oklch(0.42 0.13 45); }
+  @keyframes omLamp { 0% { box-shadow: 0 0 0 2px rgba(200,90,42,0.35), 0 0 16px 2px rgba(200,90,42,0.55) } 50% { box-shadow: 0 0 0 4px rgba(200,90,42,0.18), 0 0 26px 6px rgba(200,90,42,0.32) } 100% { box-shadow: 0 0 0 2px rgba(200,90,42,0.35), 0 0 16px 2px rgba(200,90,42,0.55) } }
+  @keyframes omNudge { 0%,100% { transform: translateX(0) } 30% { transform: translateX(-3px) } 70% { transform: translateX(3px) } }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#2a2018;background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px, transparent 1px, transparent 4px);color:oklch(0.88 0.02 80);font-family:'Shippori Mincho',serif">
+
+  <header style="display:flex;align-items:flex-end;gap:26px;padding:16px 24px 14px;border-bottom:2px solid oklch(0.42 0.05 60);background:linear-gradient(180deg, oklch(0.34 0.03 55), oklch(0.27 0.025 55))">
+    <div>
+      <div style="font-family:'Oswald',sans-serif;font-weight:400;font-size:22px;letter-spacing:0.30em;color:oklch(0.84 0.09 80);line-height:1">MORSE PRACTICE SET</div>
+      <div style="font-family:'Shippori Mincho',serif;font-size:12px;letter-spacing:0.30em;color:oklch(0.66 0.03 70);margin-top:6px">符 号 樹 練 習 器　型 1926</div>
+    </div>
+
+    <div style="display:flex;margin-left:auto;border:1px solid oklch(0.50 0.06 70);border-radius:2px;overflow:hidden;background:oklch(0.24 0.02 55)">
+      <button type="button" onClick="{{ setIntl }}" style="{{ tabIntlStyle }}">欧文</button>
+      <button type="button" onClick="{{ setWabun }}" style="{{ tabWabunStyle }}">和文</button>
+    </div>
+
+    <button type="button" onClick="{{ toggleSound }}" style="{{ soundStyle }}">{{ soundLabel }}</button>
+
+    <div style="display:flex;align-items:center;gap:7px">
+      <button type="button" onClick="{{ zoomOut }}" style="width:32px;height:32px;border:1px solid oklch(0.50 0.06 70);background:oklch(0.24 0.02 55);color:oklch(0.82 0.05 75);border-radius:2px;font-family:'Courier Prime',monospace;font-size:16px;cursor:pointer">−</button>
+      <button type="button" onClick="{{ fit }}" style="height:32px;padding:0 12px;white-space:nowrap;border:1px solid oklch(0.50 0.06 70);background:oklch(0.24 0.02 55);color:oklch(0.82 0.05 75);border-radius:2px;font-family:'Shippori Mincho',serif;font-size:12px;letter-spacing:0.08em;cursor:pointer">全体 {{ zoomLabel }}</button>
+      <button type="button" onClick="{{ zoomIn }}" style="width:32px;height:32px;border:1px solid oklch(0.50 0.06 70);background:oklch(0.24 0.02 55);color:oklch(0.82 0.05 75);border-radius:2px;font-family:'Courier Prime',monospace;font-size:16px;cursor:pointer">+</button>
+    </div>
+  </header>
+
+  <div style="display:flex;flex:1;min-height:0;flex-wrap:wrap;align-items:stretch">
+
+    <section style="flex:1 1 380px;min-width:0;min-height:320px;display:flex;flex-direction:column;padding:18px;box-sizing:border-box">
+      <div style="flex:1;display:flex;flex-direction:column;min-height:0;border:1px solid oklch(0.46 0.05 65);box-shadow:inset 0 0 0 1px oklch(0.30 0.03 55), 0 2px 0 oklch(0.22 0.02 55);background:oklch(0.91 0.028 85)">
+        <div style="display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1px solid oklch(0.62 0.05 70);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:0.20em;color:oklch(0.40 0.05 50);background:oklch(0.86 0.035 82)">
+          <span>SIGNAL TREE — 全体図</span>
+          <span style="margin-left:auto;font-family:'Courier Prime',monospace;letter-spacing:0.06em">{{ treeLabel }}</span>
+        </div>
+        <div ref="{{ treeRef }}" style="flex:1;overflow:auto;padding:26px 30px 36px">
+          <div style="position:relative;width:{{ layoutW }}px;height:{{ layoutH }}px">
+            <svg width="{{ layoutW }}" height="{{ layoutH }}" viewBox="{{ viewBox }}" style="display:block;position:absolute;left:0;top:0">
+              <sc-for list="{{ rules }}" as="r" hint-placeholder-count="7">
+                <line x1="0" y1="{{ r.y }}" x2="{{ r.w }}" y2="{{ r.y }}" stroke="oklch(0.80 0.03 78)" strokeWidth="0.7" strokeDasharray="1 5" />
+              </sc-for>
+              <sc-for list="{{ edges }}" as="e" hint-placeholder-count="30">
+                <path d="{{ e.d }}" fill="none" stroke="{{ e.stroke }}" strokeWidth="{{ e.w }}" strokeLinecap="square" />
+              </sc-for>
+            </svg>
+            <sc-for list="{{ branchMarks }}" as="b" hint-placeholder-count="0">
+              <div style="{{ b.style }}">{{ b.sym }}</div>
+            </sc-for>
+            <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="45">
+              <div onClick="{{ n.onClick }}" style="{{ n.style }}">{{ n.char }}</div>
+            </sc-for>
+            <sc-for list="{{ rules }}" as="r" hint-placeholder-count="7">
+              <div style="{{ r.labelStyle }}">{{ r.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside style="flex:1 1 340px;max-width:430px;display:flex;flex-direction:column;gap:14px;padding:18px 18px 18px 0;box-sizing:border-box">
+
+      <div style="border:1px solid oklch(0.46 0.05 65);background:oklch(0.23 0.02 55);box-shadow:inset 0 1px 0 oklch(0.34 0.03 55);padding:16px 18px 18px">
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:0.24em;color:oklch(0.64 0.04 70)">RECEIVED SIGNAL</div>
+        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:12px">
+          <div style="{{ signalStyle }}">{{ signalGlyphs }}</div>
+          <div style="margin-left:auto;text-align:right;line-height:1">
+            <div style="font-size:46px;font-weight:700;font-family:'Shippori Mincho',serif;color:{{ charColor }}">{{ currentChar }}</div>
+          </div>
+        </div>
+        <div style="{{ hintStyle }}">{{ hintText }}</div>
+      </div>
+
+      <div
+        onPointerDown="{{ keyDown }}"
+        onPointerUp="{{ keyUp }}"
+        onPointerLeave="{{ keyUp }}"
+        onContextMenu="{{ noMenu }}"
+        style="{{ keyPlateStyle }}">
+        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:0.26em;color:oklch(0.30 0.05 55)">STRAIGHT KEY</div>
+        <div style="font-family:'Shippori Mincho',serif;font-size:15px;color:oklch(0.26 0.05 50);margin-top:6px">押して離す ─ 短く「・」／長く「－」</div>
+        <div style="width:78%;height:7px;margin-top:14px;border:1px solid oklch(0.42 0.05 55);background:oklch(0.80 0.03 80);position:relative;overflow:hidden">
+          <div style="{{ holdBarStyle }}"></div>
+        </div>
+        <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.08em;color:oklch(0.34 0.04 55);margin-top:8px">{{ holdLabel }}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button type="button" onClick="{{ commit }}" style="{{ commitStyle }}">確定 <span style="font-family:'Courier Prime',monospace;font-size:10px;opacity:0.75">ENTER</span></button>
+        <button type="button" onClick="{{ back }}" style="height:50px;border:1px solid oklch(0.50 0.06 70);background:oklch(0.24 0.02 55);color:oklch(0.84 0.03 75);border-radius:2px;cursor:pointer;font-family:'Shippori Mincho',serif;font-size:14px" style-hover="background:oklch(0.29 0.03 55)">1つ戻す <span style="font-family:'Courier Prime',monospace;font-size:10px;opacity:0.75">BS</span></button>
+      </div>
+
+      <sc-if value="{{ showCandidates }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="border:1px solid oklch(0.42 0.04 60);background:oklch(0.22 0.02 55);padding:9px 12px">
+            <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.10em;color:oklch(0.64 0.04 70)">短く ・</div>
+            <div style="font-size:23px;font-weight:700;margin-top:3px;color:{{ dotNextColor }}">{{ dotNext }}</div>
+            <div style="font-size:11px;color:oklch(0.60 0.02 70);margin-top:2px;letter-spacing:0.06em">{{ dotNextSub }}</div>
+          </div>
+          <div style="border:1px solid oklch(0.42 0.04 60);background:oklch(0.22 0.02 55);padding:9px 12px">
+            <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.10em;color:oklch(0.64 0.04 70)">長く －</div>
+            <div style="font-size:23px;font-weight:700;margin-top:3px;color:{{ dashNextColor }}">{{ dashNext }}</div>
+            <div style="font-size:11px;color:oklch(0.60 0.02 70);margin-top:2px;letter-spacing:0.06em">{{ dashNextSub }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="flex:1;display:flex;flex-direction:column;min-height:150px;border:1px solid oklch(0.46 0.05 65);background:oklch(0.91 0.028 85);box-shadow:0 2px 0 oklch(0.22 0.02 55)">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid oklch(0.62 0.05 70);background:oklch(0.86 0.035 82)">
+          <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:0.22em;color:oklch(0.40 0.05 50)">TAPE</div>
+          <div style="font-family:'Courier Prime',monospace;font-size:11px;color:oklch(0.46 0.04 55);margin-left:auto">{{ countLabel }}</div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:14px 16px;font-family:'Courier Prime',monospace;font-size:22px;line-height:1.75;letter-spacing:0.14em;word-break:break-all;text-wrap:pretty;color:{{ textColor }};background-image:repeating-linear-gradient(180deg, transparent 0px, transparent 37px, oklch(0.78 0.04 80) 37px, oklch(0.78 0.04 80) 38px)">{{ outputText }}</div>
+        <button type="button" onClick="{{ reset }}" style="height:44px;border:0;border-top:1px solid oklch(0.62 0.05 70);background:oklch(0.86 0.035 82);color:oklch(0.38 0.10 35);cursor:pointer;font-family:'Shippori Mincho',serif;font-size:13px;letter-spacing:0.10em" style-hover="background:oklch(0.81 0.05 80)">テープを消去（リセット）</button>
+      </div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lampColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#c85a2a&quot;,&quot;options&quot;:[&quot;#c85a2a&quot;,&quot;#a8452f&quot;,&quot;#8a6a1f&quot;,&quot;#3f8f7a&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intl&quot;,&quot;wabun&quot;],&quot;default&quot;:&quot;intl&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sound&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showCandidates&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const INTL = {
+  "A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---",
+  "K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-",
+  "U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..",
+  "1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----",
+  ".":".-.-.-",",":"--..--","?":"..--..","/":"-..-.","=":"-...-","+":".-.-.","-":"-....-",":":"---...",
+  "(":"-.--.",")":"-.--.-","&":".-...","@":".--.-.","!":"-.-.--","\"":".-..-.","'":".----.",";":"-.-.-.","_":"..--.-"
+};
+
+const WABUN = {
+  "イ":".-","ロ":".-.-","ハ":"-...","ニ":"-.-.","ホ":"-..","ヘ":".","ト":"..-..","チ":"..-.","リ":"--.","ヌ":"....",
+  "ル":"-.--.","ヲ":".---","ワ":"-.-","カ":".-..","ヨ":"--","タ":"-.","レ":"---","ソ":"---.","ツ":".--.","ネ":"--.-",
+  "ナ":".-.","ラ":"...","ム":"-","ウ":"..-","ヰ":".-..-","ノ":"..--","オ":".-...","ク":"...-","ヤ":".--","マ":"-..-",
+  "ケ":"-.--","フ":"--..","コ":"----","エ":"-.---","テ":".-.--","ア":"--.--","サ":"-.-.-","キ":"-.-..","ユ":"-..--",
+  "メ":"-...-","ミ":"..-.-","シ":"--.-.","ヱ":".--..","ヒ":"--..-","モ":"-..-.","セ":".---.","ス":"---.-","ン":".-.-.",
+  "゛":"..","゜":"..--.","ー":".--.-","、":".-.-.-","。":".-.-.."
+};
+
+const XG = 32, YG = 60, PADX = 30, PADY = 24, DASH_MS = 170;
+const R_LETTER = 13, R_CUR = 19, R_DOT = 5;
+
+class Component extends DCLogic {
+  state = { code: "", text: "", lang: null, sound: null, zoom: 1, err: "", holding: false, hold: 0, lastSym: "" };
+  treeRef = React.createRef();
+  _cache = {};
+  _prevCode = "";
+
+  componentDidMount() {
+    this._onKeyDown = (e) => {
+      const k = e.key;
+      if (k === " " || k === "Shift") { e.preventDefault(); this.startKey(); }
+      else if (k === "ArrowLeft") { e.preventDefault(); this.push("."); }
+      else if (k === "ArrowRight") { e.preventDefault(); this.push("-"); }
+      else if (k === "Enter") { e.preventDefault(); this.commit(); }
+      else if (k === "Backspace") { e.preventDefault(); this.back(); }
+    };
+    this._onKeyUp = (e) => {
+      if (e.key === " " || e.key === "Shift") { e.preventDefault(); this.endKey(); }
+    };
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
+    this.fit();
+    setTimeout(() => this.fit(), 150);
+  }
+
+  fit = () => {
+    const box = this.treeRef.current;
+    if (!box) { this.center("", false); return; }
+    const t = this.tree();
+    const zh = (box.clientHeight - 20) / t.h;
+    const z = Math.max(0.85, Math.min(1.35, zh));
+    this.setState({ zoom: Math.round(z * 100) / 100 }, () => this.center("", false));
+  };
+
+  center(code, smooth) {
+    const box = this.treeRef.current;
+    const p = this.tree().pos[code];
+    if (!box || !p) return;
+    const z = this.state.zoom;
+    box.scrollTo({
+      left: Math.max(0, (p.x + PADX) * z - box.clientWidth / 2),
+      top: Math.max(0, (p.d * YG + PADY) * z - box.clientHeight / 2),
+      behavior: smooth ? "smooth" : "auto"
+    });
+  }
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
+    clearInterval(this._tick);
+  }
+
+  componentDidUpdate() {
+    const code = this.state.code;
+    if (code === this._prevCode) return;
+    this._prevCode = code;
+    this.center(code, true);
+  }
+
+  lang() { return this.state.lang ?? (this.props.lang ?? "intl"); }
+  soundOn() { return this.state.sound ?? (this.props.sound !== false); }
+  lamp() { return this.props.lampColor ?? "#c85a2a"; }
+
+  tree() {
+    const lang = this.lang();
+    if (this._cache[lang]) return this._cache[lang];
+    const map = lang === "wabun" ? WABUN : INTL;
+    const byCode = {};
+    Object.keys(map).forEach((ch) => { byCode[map[ch]] = ch; });
+    const exists = new Set([""]);
+    Object.keys(byCode).forEach((c) => { for (let i = 1; i <= c.length; i++) exists.add(c.slice(0, i)); });
+    const pos = {};
+    let leaf = 0;
+    const walk = (code) => {
+      const kids = [code + ".", code + "-"].filter((c) => exists.has(c));
+      let x;
+      if (!kids.length) { x = leaf * XG; leaf++; }
+      else { const xs = kids.map(walk); x = (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2; }
+      pos[code] = { x: x, d: code.length };
+      return x;
+    };
+    walk("");
+    let maxX = 0, maxD = 0;
+    Object.keys(pos).forEach((c) => { maxX = Math.max(maxX, pos[c].x); maxD = Math.max(maxD, pos[c].d); });
+    const t = { byCode: byCode, exists: exists, pos: pos, w: maxX + PADX * 2, h: maxD * YG + PADY * 2, count: Object.keys(byCode).length };
+    this._cache[lang] = t;
+    return t;
+  }
+
+  ctx() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    this._ac = this._ac || new AC();
+    if (this._ac.state === "suspended") this._ac.resume();
+    return this._ac;
+  }
+  startTone() {
+    if (!this.soundOn()) return;
+    try {
+      const ctx = this.ctx();
+      if (!ctx || this._osc) return;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = 620;
+      g.gain.setValueAtTime(0, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0.16, ctx.currentTime + 0.01);
+      o.connect(g); g.connect(ctx.destination); o.start();
+      this._osc = o; this._gain = g;
+    } catch (e) {}
+  }
+  stopTone() {
+    try {
+      if (!this._osc) return;
+      const ctx = this._ac, t0 = ctx.currentTime;
+      this._gain.gain.cancelScheduledValues(t0);
+      this._gain.gain.setValueAtTime(this._gain.gain.value, t0);
+      this._gain.gain.linearRampToValueAtTime(0, t0 + 0.02);
+      this._osc.stop(t0 + 0.05);
+    } catch (e) {}
+    this._osc = null; this._gain = null;
+  }
+  blip(freq) {
+    if (!this.soundOn()) return;
+    try {
+      const ctx = this.ctx();
+      if (!ctx) return;
+      const o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime;
+      o.type = "triangle"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.14, t0);
+      g.gain.linearRampToValueAtTime(0, t0 + 0.10);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0 + 0.12);
+    } catch (e) {}
+  }
+
+  startKey = () => {
+    if (this.state.holding) return;
+    this._t0 = Date.now();
+    this.startTone();
+    this.setState({ holding: true, hold: 0, err: "" });
+    clearInterval(this._tick);
+    this._tick = setInterval(() => this.setState({ hold: Date.now() - this._t0 }), 30);
+  };
+  endKey = () => {
+    if (!this.state.holding) return;
+    clearInterval(this._tick);
+    this.stopTone();
+    const dur = Date.now() - this._t0;
+    this.setState({ holding: false, hold: 0 });
+    this.push(dur < DASH_MS ? "." : "-");
+  };
+  keyDown = (e) => { if (e && e.preventDefault) e.preventDefault(); this.startKey(); };
+  keyUp = () => this.endKey();
+  noMenu = (e) => { if (e && e.preventDefault) e.preventDefault(); };
+
+  push = (sym) => {
+    const t = this.tree();
+    const next = this.state.code + sym;
+    if (!t.exists.has(next)) { this.flash("この先に符号はありません"); return; }
+    this.setState({ code: next, err: "", lastSym: sym });
+  };
+
+  back = () => {
+    if (!this.state.code) return;
+    this.setState({ code: this.state.code.slice(0, -1), err: "" });
+  };
+
+  commit = () => {
+    const t = this.tree();
+    const ch = t.byCode[this.state.code];
+    if (!ch) { this.flash(this.state.code ? "対応する文字がありません" : "符号を入力してください"); return; }
+    this.blip(940);
+    this.setState({ text: this.state.text + ch, code: "", err: "" });
+  };
+
+  reset = () => this.setState({ text: "", code: "", err: "" });
+
+  flash(msg) {
+    this.setState({ err: msg });
+    clearTimeout(this._et);
+    this._et = setTimeout(() => this.setState({ err: "" }), 1400);
+  }
+
+  setIntl = () => this.setState({ lang: "intl", code: "", err: "" }, this.fit);
+  setWabun = () => this.setState({ lang: "wabun", code: "", err: "" }, this.fit);
+  toggleSound = () => this.setState({ sound: !this.soundOn() });
+  zoomIn = () => this.setState({ zoom: Math.min(1.6, Math.round((this.state.zoom + 0.15) * 100) / 100) });
+  zoomOut = () => this.setState({ zoom: Math.max(0.5, Math.round((this.state.zoom - 0.15) * 100) / 100) });
+
+  descend(code, t) {
+    const out = [];
+    const walk = (c) => {
+      if (out.length > 5) return;
+      const ch = t.byCode[c];
+      if (ch) out.push(ch);
+      [c + ".", c + "-"].forEach((k) => { if (t.exists.has(k)) walk(k); });
+    };
+    walk(code);
+    return out;
+  }
+
+  tabStyle(on, lamp) {
+    return "height:34px;padding:0 20px;border:0;cursor:pointer;white-space:nowrap;flex:0 0 auto;font-family:'Shippori Mincho',serif;font-size:14px;letter-spacing:0.12em;background:" +
+      (on ? lamp : "transparent") + ";color:" + (on ? "oklch(0.97 0.02 85)" : "oklch(0.74 0.04 75)");
+  }
+
+  renderVals() {
+    const lamp = this.lamp();
+    const t = this.tree();
+    const code = this.state.code;
+    const z = this.state.zoom;
+    const holding = this.state.holding;
+    const hold = this.state.hold;
+
+    const onPath = new Set([""]);
+    for (let i = 1; i <= code.length; i++) onPath.add(code.slice(0, i));
+
+    const ink = "oklch(0.58 0.035 55)";
+    const nodes = [], edges = [], rules = [], branchMarks = [];
+    let maxD = 0;
+    Object.keys(t.pos).forEach((c) => { maxD = Math.max(maxD, t.pos[c].d); });
+    for (let d = 0; d <= maxD; d++) {
+      rules.push({
+        y: d * YG + PADY, w: t.w,
+        label: d === 0 ? "根" : String(d),
+        labelStyle: "position:absolute;left:0px;top:" + ((d * YG + PADY) * z) + "px;transform:translateY(-50%);font-family:'Oswald',sans-serif;font-size:" + Math.max(10, 10 * z) + "px;letter-spacing:0.1em;color:oklch(0.58 0.04 55);background:oklch(0.91 0.028 85);padding:0 3px"
+      });
+    }
+
+    Object.keys(t.pos).forEach((c) => {
+      const p = t.pos[c], x = p.x + PADX, y = p.d * YG + PADY;
+      const isCur = c === code;
+      const inPath = onPath.has(c);
+      const isNext = c.length === code.length + 1 && c.slice(0, code.length) === code;
+      const ch = t.byCode[c] || "";
+      const isRoot = c === "";
+      const r = isCur ? R_CUR : ch || isRoot ? R_LETTER : R_DOT;
+      const size = r * 2;
+      let bg = "oklch(0.955 0.018 85)", border = "1px solid oklch(0.55 0.045 55)", col = "oklch(0.28 0.05 50)", extra = "", weight = "700";
+      if (!ch && !isRoot) { bg = ink; border = "0"; col = "transparent"; }
+      if (isNext) { border = "1.5px dashed " + lamp; bg = "oklch(0.94 0.035 82)"; }
+      if (inPath && !isCur) { bg = "oklch(0.88 0.07 72)"; border = "1.5px solid " + lamp; col = lamp; }
+      if (isCur) {
+        bg = lamp; border = "2px solid oklch(0.40 0.10 40)"; col = "oklch(0.98 0.02 85)";
+        extra = ";animation:omLamp 1.5s ease-in-out infinite;z-index:3";
+      }
+      nodes.push({
+        code: c,
+        char: isRoot ? "◉" : ch,
+        onClick: () => this.setState({ code: c, err: "" }),
+        style: "position:absolute;left:" + (x * z) + "px;top:" + (y * z) + "px;width:" + (size * z) + "px;height:" + (size * z) + "px;margin-left:" + (-size * z / 2) + "px;margin-top:" + (-size * z / 2) + "px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer;user-select:none;transition:background 0.12s, color 0.12s;font-family:'Courier Prime','Shippori Mincho',serif;font-weight:" + weight + ";font-size:" + Math.max(isCur ? 15 : 11.5, (isCur ? 17 : 12.5) * z) + "px;background:" + bg + ";border:" + border + ";color:" + col + extra
+      });
+      if (c !== "") {
+        const pp = t.pos[c.slice(0, -1)];
+        if (!pp) return;
+        const px = pp.x + PADX, py = pp.d * YG + PADY;
+        const isDot = c.slice(-1) === ".";
+        const active = onPath.has(c);
+        const pr = pp.d === 0 || t.byCode[c.slice(0, -1)] ? (code === c.slice(0, -1) ? R_CUR : R_LETTER) : (code === c.slice(0, -1) ? R_CUR : R_DOT);
+        const ymid = py + Math.round(YG * 0.52);
+        edges.push({
+          d: "M " + px + " " + (py + pr) + " L " + px + " " + ymid + " L " + x + " " + ymid + " L " + x + " " + (y - r),
+          stroke: active ? lamp : ink, w: active ? 2.4 : 0.9
+        });
+        branchMarks.push({
+          sym: isDot ? "・" : "－",
+          style: "position:absolute;left:" + (((px + x) / 2) * z) + "px;top:" + ((ymid - 7) * z) + "px;transform:translate(-50%,-50%);font-family:'Courier Prime',monospace;font-size:" + Math.max(9, 9.5 * z) + "px;line-height:1;pointer-events:none;color:" + (active ? lamp : "oklch(0.60 0.035 55)")
+        });
+      }
+    });
+
+    const curChar = t.byCode[code];
+    const dotKids = this.descend(code + ".", t), dashKids = this.descend(code + "-", t);
+    const dotCh = t.byCode[code + "."], dashCh = t.byCode[code + "-"];
+    const isDashHold = hold >= DASH_MS;
+
+    return {
+      nodes: nodes, edges: edges, rules: rules, branchMarks: branchMarks,
+      layoutW: t.w * z, layoutH: t.h * z, viewBox: "0 0 " + t.w + " " + t.h,
+      treeRef: this.treeRef,
+      treeLabel: (this.lang() === "wabun" ? "和文" : "欧文") + " / " + t.count + " 字 / 全 " + Object.keys(t.pos).length + " 節点",
+      zoomLabel: Math.round(z * 100) + "%",
+      tabIntlStyle: this.tabStyle(this.lang() === "intl", lamp),
+      tabWabunStyle: this.tabStyle(this.lang() === "wabun", lamp) + ";border-left:1px solid oklch(0.50 0.06 70)",
+      soundLabel: this.soundOn() ? "音 入" : "音 切",
+      soundStyle: "height:34px;padding:0 16px;white-space:nowrap;flex:0 0 auto;border:1px solid oklch(0.50 0.06 70);border-radius:2px;cursor:pointer;font-family:'Shippori Mincho',serif;font-size:13px;letter-spacing:0.10em;background:oklch(0.24 0.02 55);color:" + (this.soundOn() ? "oklch(0.82 0.10 80)" : "oklch(0.60 0.02 70)"),
+      signalGlyphs: code ? code.split("").map((s) => (s === "." ? "・" : "－")).join(" ") : "—",
+      signalStyle: "font-family:'Courier Prime',monospace;font-size:30px;letter-spacing:0.05em;color:" + (code ? "oklch(0.86 0.10 80)" : "oklch(0.46 0.02 65)") + (this.state.err ? ";animation:omNudge 0.28s" : ""),
+      currentChar: curChar || "—",
+      charColor: curChar ? "oklch(0.94 0.03 85)" : "oklch(0.42 0.02 65)",
+      hintText: this.state.err || (curChar ? "Enter で確定 ─ テープに送る" : code ? "この節点に文字はありません ─ 続けて叩く" : "キーを叩いてツリーをたどる"),
+      hintStyle: "margin-top:14px;font-size:12.5px;letter-spacing:0.08em;color:" + (this.state.err ? "oklch(0.72 0.13 35)" : "oklch(0.64 0.03 70)"),
+      keyPlateStyle: "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px 18px;min-height:150px;cursor:pointer;user-select:none;touch-action:none;border:1px solid oklch(0.46 0.06 70);border-radius:3px;transition:transform 0.06s, box-shadow 0.06s;background:radial-gradient(120% 140% at 50% 0%, oklch(0.90 0.06 85), oklch(0.78 0.07 78));" +
+        (holding
+          ? "transform:translateY(2px);box-shadow:inset 0 3px 10px oklch(0.42 0.06 55), 0 0 22px " + lamp
+          : "box-shadow:inset 0 1px 0 oklch(0.97 0.03 90), 0 3px 0 oklch(0.34 0.03 55)"),
+      holdBarStyle: "position:absolute;left:0;top:0;bottom:0;width:" + Math.min(100, (hold / (DASH_MS * 2)) * 100) + "%;background:" + (isDashHold ? lamp : "oklch(0.62 0.10 70)"),
+      holdLabel: holding ? (isDashHold ? "長点 －" : "短点 ・") : (this.state.lastSym === "-" ? "直前 －" : this.state.lastSym === "." ? "直前 ・" : "待機中 ─ SPACE でも可"),
+      commitStyle: "height:50px;border:1px solid " + (curChar ? "oklch(0.42 0.10 40)" : "oklch(0.44 0.03 60)") + ";border-radius:2px;cursor:pointer;font-family:'Shippori Mincho',serif;font-size:15px;letter-spacing:0.10em;background:" + (curChar ? lamp : "oklch(0.24 0.02 55)") + ";color:" + (curChar ? "oklch(0.98 0.02 85)" : "oklch(0.52 0.02 65)"),
+      showCandidates: this.props.showCandidates !== false,
+      dotNext: dotCh || (dotKids.length ? "…" : "×"),
+      dashNext: dashCh || (dashKids.length ? "…" : "×"),
+      dotNextColor: dotCh ? "oklch(0.88 0.09 80)" : "oklch(0.54 0.02 65)",
+      dashNextColor: dashCh ? "oklch(0.88 0.09 80)" : "oklch(0.54 0.02 65)",
+      dotNextSub: dotKids.length ? dotKids.slice(0, 5).join(" ") : "先なし",
+      dashNextSub: dashKids.length ? dashKids.slice(0, 5).join(" ") : "先なし",
+      outputText: this.state.text || "",
+      textColor: this.state.text ? "oklch(0.30 0.05 50)" : "oklch(0.66 0.03 68)",
+      countLabel: this.state.text.length + " 字",
+      keyDown: this.keyDown, keyUp: this.keyUp, noMenu: this.noMenu,
+      commit: this.commit, back: this.back, reset: this.reset,
+      setIntl: this.setIntl, setWabun: this.setWabun, toggleSound: this.toggleSound,
+      zoomIn: this.zoomIn, zoomOut: this.zoomOut, fit: this.fit
+    };
+  }
+}
+</script>
+</body>
+</html>

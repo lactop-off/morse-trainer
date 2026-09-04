@@ -1,0 +1,16 @@
+{
+  "name": "morse-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Morse Practice Set - learn Morse code by tracing a signal tree",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node build.mjs && node scripts/serve.mjs",
+    "preview": "node build.mjs && wrangler pages dev public",
+    "deploy": "node build.mjs && wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
