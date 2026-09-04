@@ -1,5 +1,7 @@
 # Morse Practice Set
 
+**公開先 → https://morse-trainer-e7x.pages.dev/**
+
 符号樹（モールス符号の二分木）をたどって、モールス符号を覚えるための練習器。
 ブラウザだけで動き、登録も設定も要らない。9言語対応。
 
@@ -39,7 +41,7 @@ npm run preview   # wrangler pages dev で確認
 
 ```bash
 npm run deploy                                  # wrangler pages deploy public
-SITE_URL=https://example.com npm run build      # canonical と OG のURLを指定する場合
+SITE_URL=https://morse-trainer-e7x.pages.dev npm run build   # canonical と OG のURL
 ```
 
 初回のみ Cloudflare へのログインが必要:
