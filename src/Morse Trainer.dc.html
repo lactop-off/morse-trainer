@@ -16,7 +16,8 @@
   .mch {
     --m1:#847d73; --m2:#615b53; --m3:#443f39; --m4:#2e2b26;
     --dim:#8f887a; --etch:#221f1a;
-    height:100vh; overflow:hidden; box-sizing:border-box; padding:11px; display:flex;
+    height:calc(100vh - var(--ad-reserve, 0px)); overflow:hidden; box-sizing:border-box;
+    padding:11px; display:flex;
     background:radial-gradient(130% 100% at 50% -18%, #2a2620, #0a0908 72%);
     font-family:var(--ui-font);
     -webkit-font-smoothing:antialiased;
@@ -126,7 +127,7 @@
   }
   @media (max-width:1280px) { .side { flex-basis:322px; max-width:356px } .bay { padding-left:9px } }
   @media (max-width:900px) {
-    .mch { height:auto; min-height:100vh; overflow:visible }
+    .mch { height:auto; min-height:calc(100vh - var(--ad-reserve, 0px)); overflow:visible }
     .body { flex-wrap:wrap }
     .side { padding-left:13px; max-width:none }
     .bay { min-height:min(88vw, 620px) }
@@ -410,6 +411,7 @@
           <div class="row">
             <button type="button" class="btn skip" onClick="{{ skip }}">{{ L.dSkip }}</button>
             <span class="glabel" style="margin-left:auto">{{ poolLabel }}</span>
+            <button type="button" class="btn skip" style="margin-left:10px" onClick="{{ resetProgress }}">{{ L.dReset }}</button>
           </div>
         </div>
       </sc-if>
@@ -506,6 +508,7 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;lampColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ff9a2e&quot;,&quot;options&quot;:[&quot;#ff9a2e&quot;,&quot;#ffd24a&quot;,&quot;#5ce08a&quot;,&quot;#57b6ff&quot;,&quot;#ff5f45&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intl&quot;,&quot;wabun&quot;],&quot;default&quot;:&quot;intl&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sound&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;drill&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;keyMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;key&quot;,&quot;pad&quot;],&quot;default&quot;:&quot;key&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+/* @codes-start */
 const INTL = {
   "A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---",
   "K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-",
@@ -523,6 +526,7 @@ const WABUN = {
   "メ":"-...-","ミ":"..-.-","シ":"--.-.","ヱ":".--..","ヒ":"--..-","モ":"-..-.","セ":".---.","ス":"---.-","ン":".-.-.",
   "゛":"..","゜":"..--.","ー":".--.-","、":".-.-.-","。":".-.-.."
 };
+/* @codes-end */
 
 /* ══════════ 表示言語 ══════════
    決め方の優先順位：?lang= → 手動で選んだ記憶 → /xx/ → サブドメイン
@@ -558,6 +562,22 @@ function langFromHost(host) {
   if (parts.length > 1 && HAS_LANG[parts[0]]) return parts[0];         /* ja.example.com */
   return TLD_LANG[parts[parts.length - 1]] || "";                       /* example.jp */
 }
+/* ── 練習の進捗を残す。継続してもらうことが目的なので、
+      対象字数のもとになる正解数と、連続日数を言語ごとに持つ ── */
+const PROG_KEY = "morse.prog.v1";
+function loadProg() {
+  try { const v = JSON.parse(window.localStorage.getItem(PROG_KEY) || "{}"); return v && typeof v === "object" ? v : {}; }
+  catch (e) { return {}; }
+}
+function saveProg(v) {
+  try { window.localStorage.setItem(PROG_KEY, JSON.stringify(v)); } catch (e) {}
+}
+const todayStr = () => {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+const dayGap = (a, b) => Math.round((Date.parse(b + "T00:00:00") - Date.parse(a + "T00:00:00")) / 86400000);
+
 function readStoredLang() {
   try { return window.localStorage.getItem("morse.lang") || ""; } catch (e) { return ""; }
 }
@@ -589,7 +609,7 @@ function fmt(s, v) {
 /* @str-start */
 const STR = {
   en: {
-    title: "Morse Practice Set — learn Morse on a code tree",
+    title: "Morse Code Trainer — learn the alphabet on a code tree",
     desc: "Learn Morse code by tracing a signal tree. Tap a straight key or two buttons, watch the branch light up, and practise with built-in drills. Latin and Japanese Wabun, free in your browser.",
     langName: "English", nojs: "This page needs JavaScript. Turn it on to use the practice set.",
     sub: "Signal-Tree Practice Set · Model 1926 · No. 004-A",
@@ -600,6 +620,7 @@ const STR = {
     dPrompt: "Send this character", dWait: "Waiting for your key", dOk: "Correct",
     dNg: "Wrong — you sent “{c}”", dSkip: "Skip (show the answer)",
     dStat: "Correct {a} · Wrong {b}", dPool: "Set: {a} of {b}",
+    dStreak: "Streak {d} d", dReset: "Reset score",
     rxT: "RECEIVED SIGNAL", rxS: "Signal", mark: "MARK",
     stCommit: "Pause {s} s to commit — Enter commits now",
     stNoChar: "No character at this node — keep keying",
@@ -620,7 +641,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   ja: {
-    title: "符号樹モールス練習器",
+    title: "モールス信号 練習 ─ 符号樹で覚えるモールス符号",
     desc: "符号樹をたどってモールス符号を覚える練習器。電鍵または2つの釦で打つと、たどった枝が光ります。出題モードつき。欧文と和文に対応、ブラウザだけで動きます。",
     langName: "日本語", nojs: "この練習器は JavaScript を使います。有効にしてお使いください。",
     sub: "符 号 樹 練 習 器 ・ 型 1926 ・ No. 004-A",
@@ -631,6 +652,7 @@ const STR = {
     dPrompt: "この文字を打つ", dWait: "打鍵を待っています", dOk: "正解",
     dNg: "誤り ─ 送信は「{c}」", dSkip: "とばす（樹で答えを示す）",
     dStat: "正解 {a} ・ 誤 {b}", dPool: "対象 {a} 字 / {b} 字",
+    dStreak: "連続 {d} 日", dReset: "成績を消去",
     rxT: "RECEIVED SIGNAL", rxS: "受信符号", mark: "MARK",
     stCommit: "手を止めれば {s} 秒で確定（Enter で即確定）",
     stNoChar: "この節点に文字はありません ─ 続けて打鍵",
@@ -651,7 +673,7 @@ const STR = {
     dotG: "・", dashG: "－"
   },
   es: {
-    title: "Equipo de práctica Morse — aprende con el árbol de códigos",
+    title: "Entrenador de código Morse — aprende el alfabeto en un árbol de códigos",
     desc: "Aprende código Morse recorriendo un árbol de señales. Pulsa el manipulador o dos botones y mira cómo se ilumina la rama. Con ejercicios, alfabeto latino y Wabun japonés, gratis en el navegador.",
     langName: "Español", nojs: "Esta página necesita JavaScript. Actívalo para usar el equipo de práctica.",
     sub: "Equipo de práctica del árbol de señales · Modelo 1926 · N.º 004-A",
@@ -662,6 +684,7 @@ const STR = {
     dPrompt: "Transmite este carácter", dWait: "Esperando tu pulsación", dOk: "Correcto",
     dNg: "Error — enviaste «{c}»", dSkip: "Saltar (mostrar la respuesta)",
     dStat: "Aciertos {a} · Fallos {b}", dPool: "Conjunto: {a} de {b}",
+    dStreak: "Racha {d} d", dReset: "Borrar marcador",
     rxT: "SEÑAL RECIBIDA", rxS: "Señal", mark: "MARCA",
     stCommit: "Pausa {s} s para fijar — Intro fija ahora",
     stNoChar: "No hay carácter en este nodo — sigue transmitiendo",
@@ -682,7 +705,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   fr: {
-    title: "Poste d’entraînement Morse — apprendre avec l’arbre des codes",
+    title: "Entraînement au code Morse — apprendre l’alphabet sur un arbre des codes",
     desc: "Apprenez le code Morse en parcourant un arbre des signaux. Manipulez la touche ou deux boutons et voyez la branche s’allumer. Exercices intégrés, latin et wabun japonais, gratuit dans le navigateur.",
     langName: "Français", nojs: "Cette page a besoin de JavaScript. Activez-le pour utiliser le poste d’entraînement.",
     sub: "Poste d’entraînement à l’arbre des signaux · Modèle 1926 · N° 004-A",
@@ -693,6 +716,7 @@ const STR = {
     dPrompt: "Transmettez ce caractère", dWait: "En attente de votre manipulation", dOk: "Correct",
     dNg: "Erreur — vous avez envoyé « {c} »", dSkip: "Passer (montrer la réponse)",
     dStat: "Justes {a} · Fautes {b}", dPool: "Série : {a} sur {b}",
+    dStreak: "Série {d} j", dReset: "Effacer le score",
     rxT: "SIGNAL REÇU", rxS: "Signal", mark: "MARQUE",
     stCommit: "Pause de {s} s pour valider — Entrée valide tout de suite",
     stNoChar: "Aucun caractère à ce nœud — continuez",
@@ -713,7 +737,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   de: {
-    title: "Morse-Übungsgerät — Morsen am Codebaum lernen",
+    title: "Morsecode lernen — das Alphabet am Codebaum üben",
     desc: "Morsecode lernen, indem man einem Signalbaum folgt. Mit Handtaste oder zwei Tasten geben und den Ast aufleuchten sehen. Mit Übungen, lateinisch und japanisch (Wabun), kostenlos im Browser.",
     langName: "Deutsch", nojs: "Diese Seite braucht JavaScript. Bitte aktivieren, um das Übungsgerät zu nutzen.",
     sub: "Signalbaum-Übungsgerät · Modell 1926 · Nr. 004-A",
@@ -724,6 +748,7 @@ const STR = {
     dPrompt: "Dieses Zeichen geben", dWait: "Warte auf Tastung", dOk: "Richtig",
     dNg: "Falsch — gesendet wurde „{c}“", dSkip: "Überspringen (Lösung zeigen)",
     dStat: "Richtig {a} · Falsch {b}", dPool: "Umfang: {a} von {b}",
+    dStreak: "Serie {d} T", dReset: "Punktestand löschen",
     rxT: "EMPFANGENES SIGNAL", rxS: "Signal", mark: "MARKE",
     stCommit: "{s} s Pause übernimmt — Enter übernimmt sofort",
     stNoChar: "Hier steht kein Zeichen — weitertasten",
@@ -744,7 +769,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   pt: {
-    title: "Aparelho de prática de Morse — aprenda pela árvore de códigos",
+    title: "Treinador de código Morse — aprenda o alfabeto na árvore de códigos",
     desc: "Aprenda código Morse percorrendo uma árvore de sinais. Manipule a tecla ou dois botões e veja o ramo acender. Com exercícios, alfabeto latino e Wabun japonês, grátis no navegador.",
     langName: "Português", nojs: "Esta página precisa de JavaScript. Ative-o para usar o aparelho de prática.",
     sub: "Aparelho de prática da árvore de sinais · Modelo 1926 · N.º 004-A",
@@ -755,6 +780,7 @@ const STR = {
     dPrompt: "Transmita este caractere", dWait: "Aguardando o manipulador", dOk: "Correto",
     dNg: "Errado — você enviou “{c}”", dSkip: "Pular (mostrar a resposta)",
     dStat: "Acertos {a} · Erros {b}", dPool: "Conjunto: {a} de {b}",
+    dStreak: "Sequência {d} d", dReset: "Apagar pontuação",
     rxT: "SINAL RECEBIDO", rxS: "Sinal", mark: "MARCA",
     stCommit: "Pare {s} s para confirmar — Enter confirma já",
     stNoChar: "Não há caractere neste nó — continue",
@@ -775,7 +801,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   ru: {
-    title: "Морзянка — тренажёр с деревом кодов",
+    title: "Тренажёр азбуки Морзе — учим алфавит по дереву кодов",
     desc: "Учите азбуку Морзе, двигаясь по дереву сигналов. Работайте ключом или двумя кнопками и смотрите, как загорается ветвь. Есть задания, латиница и японский вабун, бесплатно в браузере.",
     langName: "Русский", nojs: "Для этой страницы нужен JavaScript. Включите его, чтобы пользоваться тренажёром.",
     sub: "Тренажёр «дерево сигналов» · модель 1926 · № 004-A",
@@ -786,6 +812,7 @@ const STR = {
     dPrompt: "Передайте этот знак", dWait: "Ожидание передачи", dOk: "Верно",
     dNg: "Ошибка — передано «{c}»", dSkip: "Пропустить (показать ответ)",
     dStat: "Верно {a} · Ошибок {b}", dPool: "Набор: {a} из {b}",
+    dStreak: "Серия {d} дн.", dReset: "Сбросить счёт",
     rxT: "ПРИНЯТЫЙ СИГНАЛ", rxS: "Сигнал", mark: "МЕТКА",
     stCommit: "Пауза {s} с — знак принят (Enter сразу)",
     stNoChar: "В этом узле нет знака — продолжайте",
@@ -806,7 +833,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   zh: {
-    title: "莫尔斯电码练习器 — 用码树学习",
+    title: "莫尔斯电码练习 — 用码树记住字母表",
     desc: "沿着码树学习莫尔斯电码。用电键或两个按钮发报，走过的分支会亮起。内置出题练习，支持拉丁字母与日文和文，浏览器即可使用。",
     langName: "中文", nojs: "本页需要 JavaScript。请启用后使用练习器。",
     sub: "码树练习器 · 1926 型 · No. 004-A",
@@ -817,6 +844,7 @@ const STR = {
     dPrompt: "请发送此字符", dWait: "等待发报", dOk: "正确",
     dNg: "错误 — 你发出的是「{c}」", dSkip: "跳过（在树上显示答案）",
     dStat: "正确 {a} · 错误 {b}", dPool: "范围：{a} / {b} 字",
+    dStreak: "连续 {d} 天", dReset: "清除成绩",
     rxT: "接收信号", rxS: "信号", mark: "标记",
     stCommit: "停手 {s} 秒即确定（Enter 立即确定）",
     stNoChar: "此节点没有字符 — 继续发报",
@@ -837,7 +865,7 @@ const STR = {
     dotG: "·", dashG: "–"
   },
   ko: {
-    title: "모스 부호 연습기 — 부호 나무로 배우기",
+    title: "모스 부호 연습 — 부호 나무로 알파벳 익히기",
     desc: "부호 나무를 따라가며 모스 부호를 배우는 연습기. 전건이나 두 버튼으로 타건하면 지나온 가지가 켜집니다. 출제 연습 포함, 라틴 문자와 일본어 와분 지원, 브라우저만으로 무료.",
     langName: "한국어", nojs: "이 페이지는 JavaScript가 필요합니다. 사용하려면 활성화해 주세요.",
     sub: "부호 나무 연습기 · 1926년형 · No. 004-A",
@@ -848,6 +876,7 @@ const STR = {
     dPrompt: "이 글자를 보내세요", dWait: "타건을 기다립니다", dOk: "정답",
     dNg: "오답 — 보낸 것은 “{c}”", dSkip: "건너뛰기(나무에 답 표시)",
     dStat: "정답 {a} · 오답 {b}", dPool: "범위: {a} / {b} 자",
+    dStreak: "연속 {d}일", dReset: "성적 지우기",
     rxT: "수신 부호", rxS: "신호", mark: "마크",
     stCommit: "{s} 초 멈추면 확정 (Enter 즉시 확정)",
     stNoChar: "이 마디에는 글자가 없습니다 — 계속 타건",
@@ -897,8 +926,9 @@ class Component extends DCLogic {
     holding: false, hold: 0, mark: false,
     mode: null, keyMode: null,
     ui: pickLang(window.location, window.navigator, readStoredLang()), langOpen: false,
-    target: "", sent: "", judge: "", reveal: "", correct: 0, wrong: 0
+    target: "", sent: "", judge: "", reveal: "", correct: 0, wrong: 0, streak: 0
   };
+  _prog = loadProg();
   tapeRef = React.createRef();
   _cache = {};
   _prevText = "";
@@ -926,6 +956,7 @@ class Component extends DCLogic {
     window.addEventListener("keyup", this._onUp);
     document.addEventListener("pointerdown", this._outside, true);
     this.applyLang();
+    this.loadProgress();
   }
   componentWillUnmount() {
     window.removeEventListener("keydown", this._onDown);
@@ -1178,6 +1209,37 @@ class Component extends DCLogic {
     if (this.state.text) this.setState({ text: this.state.text.slice(0, -1), err: "" });
   };
 
+  /* ───────── 進捗 ───────── */
+  progFor(lang) {
+    const p = this._prog[lang];
+    return (p && typeof p === "object") ? { c: p.c | 0, w: p.w | 0, streak: p.streak | 0, last: p.last || "" }
+                                        : { c: 0, w: 0, streak: 0, last: "" };
+  }
+  loadProgress() {
+    const p = this.progFor(this.lang());
+    this.setState({ correct: p.c, wrong: p.w, streak: p.streak });
+  }
+  /** 1問ぶんの結果を残す。日付が変われば連続日数を更新する */
+  recordProgress(ok) {
+    const lang = this.lang(), p = this.progFor(lang), t = todayStr();
+    if (p.last !== t) {
+      p.streak = (p.last && dayGap(p.last, t) === 1) ? p.streak + 1 : 1;
+      p.last = t;
+    }
+    if (ok) p.c += 1; else p.w += 1;
+    this._prog[lang] = p;
+    saveProg(this._prog);
+    this.setState({ correct: p.c, wrong: p.w, streak: p.streak });
+  }
+  resetProgress = () => {
+    const lang = this.lang();
+    delete this._prog[lang];
+    saveProg(this._prog);
+    clearTimeout(this._nextT); clearTimeout(this._revT);
+    this.setState({ correct: 0, wrong: 0, streak: 0, target: "", judge: "", sent: "", reveal: "" },
+      () => { if (this.isDrill()) this.nextTarget(); });
+  };
+
   /* ───────── 出題 ───────── */
   /** 対象の字数。正解が増えるほど広がる */
   poolSize() {
@@ -1195,12 +1257,14 @@ class Component extends DCLogic {
     if (!this.state.target) { this.clack(); return; }
     if (ch === this.state.target) {
       this.chime();
-      this.setState({ correct: this.state.correct + 1, judge: "ok", sent: ch });
+      this.recordProgress(true);
+      this.setState({ judge: "ok", sent: ch });
       clearTimeout(this._nextT);
       this._nextT = setTimeout(() => this.nextTarget(), 750);
     } else {
       this.buzz();
-      this.setState({ wrong: this.state.wrong + 1, judge: "ng", sent: ch });
+      this.recordProgress(false);
+      this.setState({ judge: "ng", sent: ch });
       this.showAnswer();
     }
   }
@@ -1243,8 +1307,10 @@ class Component extends DCLogic {
   switchLang(l) {
     this.clearGaps();
     clearTimeout(this._nextT); clearTimeout(this._revT);
-    this.setState({ lang: l, code: "", err: "", target: "", judge: "", sent: "", reveal: "", correct: 0, wrong: 0 },
-      () => { if (this.isDrill()) this.nextTarget(); });
+    this.setState({ lang: l, code: "", err: "", target: "", judge: "", sent: "", reveal: "" }, () => {
+      this.loadProgress();
+      if (this.isDrill()) this.nextTarget();
+    });
   }
   toggleSound = () => this.setState({ sound: !this.soundOn() });
 
@@ -1383,7 +1449,9 @@ class Component extends DCLogic {
       judgeText: this.state.judge === "ok" ? L.dOk
                : this.state.judge === "ng" ? fmt(L.dNg, { c: this.state.sent })
                : L.dWait,
-      drillStat: fmt(L.dStat, { a: this.state.correct, b: this.state.wrong }),
+      drillStat: fmt(L.dStat, { a: this.state.correct, b: this.state.wrong })
+        + (this.state.streak > 0 ? " ・ " + fmt(L.dStreak, { d: this.state.streak }) : ""),
+      resetProgress: this.resetProgress,
       poolLabel: fmt(L.dPool, { a: this.poolSize(), b: t.chars }),
       skip: this.skip,
       soundOn: soundOn, soundOff: !soundOn,

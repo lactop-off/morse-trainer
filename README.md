@@ -15,6 +15,7 @@
 ```
 src/                        原本。ここだけを編集する
   Morse Trainer.dc.html       画面と処理の本体（デザインキャンバスで編集）
+  content.mjs                 付属ページ（符号表・解説・About・privacy）の本文 9言語
   support.js                  実行基盤（自動生成物。編集しない）
   vendor/                     React 18.3.1（unpkg 版と同一。SHA-384 検証済み）
 static/                     そのまま公開物に入るファイル
@@ -23,6 +24,7 @@ static/                     そのまま公開物に入るファイル
 build.mjs                   src + static → public を組み立てる
 scripts/serve.mjs           _headers を適用して public を配る確認用サーバ
 public/                     生成物。git 管理外。Cloudflare Pages はここを配信
+docs/strategy.md            方針。何を狙い、何を狙わないか。調査の根拠つき
 archive/                    過去版（v1・v2）
 ```
 
@@ -58,10 +60,24 @@ GitHub 連携で自動公開する場合は Cloudflare Pages 側で次を設定�
 | Build output directory | `public` |
 | 環境変数 | `SITE_URL` = 公開URL（任意） |
 
+## 広告
+
+`ADSENSE_CLIENT` を渡してビルドすると、広告タグ・`ads.txt`・盤面下端の余地が入る。
+
+```bash
+ADSENSE_CLIENT=ca-pub-xxxxxxxxxxxxxxxx npm run build
+AD_RESERVE=62px   # 盤面から削る高さ。既定 62px
+```
+
+渡さなければ広告関連は一切出力されない。まずはアンカー広告（画面下端の帯）を想定。
+自前のオーバーレイに広告タグを入れるのは規約違反なので、必ず Google の形式を使うこと。
+詳細と根拠は `docs/strategy.md`。
+
 ## 検索対策（SEO）
 
 `build.mjs` が言語ごとの静的ページを吐く。1つのURLで切り替えるだけだと、
-検索エンジンには1言語しか見えないため。
+検索エンジンには1言語しか見えないため。さらに **AIのクローラーは JavaScript を
+実行しない**ので、符号表と解説は素のHTMLページとして別に持っている。
 
 | 生成物 | 内容 |
 |---|---|
@@ -72,6 +88,7 @@ GitHub 連携で自動公開する場合は Cloudflare Pages 側で次を設定�
 | `sitemap.xml` | 9URL、それぞれに hreflang 付き |
 | `404.html` | 存在しないURLに 404 を返す（重複コンテンツを防ぐ） |
 | `<noscript>` | JS を実行しない収集向けの本文と、他言語版への導線 |
+| `/chart/` `/learn/` `/about/` `/privacy/` | 9言語 × 4ページ。素のHTML。符号表106行はテキストとして存在する |
 | `og.png` | SNS カード専用の作画（1200×630・約110KB）。スクリーンショットではない |
 
 見出しは `<h1>`（銘板）と `<h2>`（各区画）で構成。画面には出ない説明文を
